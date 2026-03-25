@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-zinc-900">
+      <body className="font-sans min-h-full flex flex-col bg-zinc-50 text-neutral-950 antialiased">
         <AuthProvider>
           <Header />
           <main className="flex flex-1 flex-col">{children}</main>

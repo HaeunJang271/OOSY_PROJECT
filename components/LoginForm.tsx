@@ -85,11 +85,11 @@ export function LoginForm() {
   }
 
   if (loading) {
-    return <p className="text-sm text-zinc-500">확인 중…</p>;
+    return <p className="text-sm text-zinc-700">확인 중…</p>;
   }
   if (user) {
     return (
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-zinc-800">
         로그인되었습니다. 홈으로 이동 중…
       </p>
     );
@@ -97,7 +97,7 @@ export function LoginForm() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-zinc-800">
         카카오 계정으로만 로그인할 수 있습니다.
       </p>
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -105,7 +105,7 @@ export function LoginForm() {
         type="button"
         onClick={handleKakaoLogin}
         disabled={busy}
-        className="w-full rounded-lg bg-[#FEE500] py-3 text-sm font-semibold text-zinc-900 disabled:opacity-50"
+        className="w-full rounded-lg bg-[#FEE500] py-3 text-sm font-semibold text-zinc-950 ring-1 ring-black/10 disabled:opacity-50"
       >
         {busy ? "이동 중…" : "카카오로 로그인"}
       </button>

@@ -76,8 +76,8 @@ export function HomePosts() {
           onClick={() => setCategoryAndUrl(CATEGORY_ALL)}
           className={`rounded-full border px-3 py-1.5 text-sm ${
             category === CATEGORY_ALL
-              ? "border-zinc-900 bg-zinc-900 text-white"
-              : "border-zinc-200 bg-white text-zinc-700"
+              ? "border-zinc-900 bg-zinc-900 text-[#ffffff]"
+              : "border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50"
           }`}
         >
           {CATEGORY_ALL}
@@ -89,8 +89,8 @@ export function HomePosts() {
             onClick={() => setCategoryAndUrl(c)}
             className={`rounded-full border px-3 py-1.5 text-sm ${
               category === c
-                ? "border-zinc-900 bg-zinc-900 text-white"
-                : "border-zinc-200 bg-white text-zinc-700"
+                ? "border-zinc-900 bg-zinc-900 text-[#ffffff]"
+                : "border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50"
             }`}
           >
             {c}
@@ -99,26 +99,31 @@ export function HomePosts() {
       </div>
 
       {loading && (
-        <p className="text-sm text-zinc-500">불러오는 중…</p>
+        <p className="text-sm text-neutral-700">불러오는 중…</p>
       )}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {!loading && !error && posts.length === 0 && (
-        <p className="text-sm text-zinc-600">아직 승인된 글이 없습니다.</p>
+        <p className="text-sm text-neutral-800">아직 승인된 글이 없습니다.</p>
       )}
 
-      <ul className="divide-y divide-zinc-100">
+      <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
         {posts.map((p) => (
-          <li key={p.id} className="py-4 first:pt-0">
-            <Link href={`/posts/${p.id}`} className="block">
-              <span className="mb-1 inline-block rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
+          <li key={p.id} className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4">
+            <Link
+              href={`/posts/${p.id}`}
+              className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
+            >
+              <span className="mb-1.5 inline-block rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
                 {p.category}
               </span>
-              <h2 className="text-base font-medium text-zinc-900">{p.title}</h2>
-              <p className="mt-1 line-clamp-2 text-sm text-zinc-600">
+              <h2 className="text-lg font-semibold leading-snug text-neutral-950">
+                {p.title}
+              </h2>
+              <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-800">
                 {p.content}
               </p>
-              <p className="mt-2 text-xs text-zinc-400">
+              <p className="mt-2 text-xs font-medium text-neutral-600">
                 {formatDate(p.createdAt)}
               </p>
             </Link>

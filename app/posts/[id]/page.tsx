@@ -12,7 +12,7 @@ export default async function PostPage({ params }: PageProps) {
     <div className="mx-auto max-w-2xl flex-1 px-4 py-8">
       <Link
         href="/"
-        className="mb-6 inline-block text-sm text-zinc-600 hover:text-zinc-900"
+        className="mb-6 inline-block text-sm font-semibold text-neutral-800 hover:text-neutral-950"
       >
         ← 목록
       </Link>

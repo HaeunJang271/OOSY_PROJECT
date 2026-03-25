@@ -85,12 +85,12 @@ export function AdminDashboard() {
   }
 
   if (loading) {
-    return <p className="text-sm text-zinc-500">확인 중…</p>;
+    return <p className="text-sm text-zinc-700">확인 중…</p>;
   }
   if (!user) {
     return (
-      <p className="text-sm text-zinc-600">
-        <Link href="/login" className="underline">
+      <p className="text-sm text-zinc-800">
+        <Link href="/login" className="font-medium text-zinc-950 underline">
           로그인
         </Link>
         이 필요합니다.
@@ -99,25 +99,25 @@ export function AdminDashboard() {
   }
   if (!isAdmin) {
     return (
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-zinc-800">
         관리자만 접근할 수 있습니다. Firestore{" "}
-        <code className="rounded bg-zinc-100 px-1">admins</code> 컬렉션에 문서 ID를 본인
+        <code className="rounded bg-zinc-200 px-1.5 py-0.5 text-zinc-900">admins</code> 컬렉션에 문서 ID를 본인
         계정 UID(
-        <span className="break-all">{user.uid}</span>)로 추가했는지 확인해 주세요.
+        <span className="break-all font-mono text-sm text-zinc-950">{user.uid}</span>)로 추가했는지 확인해 주세요.
       </p>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-1">
+      <div className="flex flex-wrap gap-2 rounded-xl border border-zinc-300 bg-zinc-100/80 p-1">
         <button
           type="button"
           onClick={() => setTab("pending")}
           className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "pending"
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-600"
+              ? "bg-white text-zinc-950 shadow-sm"
+              : "text-zinc-800"
           }`}
         >
           승인 대기 ({pending.length})
@@ -127,8 +127,8 @@ export function AdminDashboard() {
           onClick={() => setTab("approved")}
           className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "approved"
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-600"
+              ? "bg-white text-zinc-950 shadow-sm"
+              : "text-zinc-800"
           }`}
         >
           공개 글 관리
@@ -139,13 +139,13 @@ export function AdminDashboard() {
 
       {tab === "pending" && (
         <section className="space-y-3">
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-zinc-800">
             승인하면 홈에 노출됩니다. 거부는 글 삭제로 처리합니다.
           </p>
           {pending.length === 0 && !error && (
-            <p className="text-sm text-zinc-500">대기 중인 글이 없습니다.</p>
+            <p className="text-sm text-zinc-700">대기 중인 글이 없습니다.</p>
           )}
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-zinc-200">
             {pending.map((p) => (
               <li
                 key={p.id}
@@ -154,11 +154,11 @@ export function AdminDashboard() {
                 <div className="min-w-0">
                   <Link
                     href={`/posts/${p.id}`}
-                    className="font-medium text-zinc-900 hover:underline"
+                    className="font-medium text-zinc-950 hover:underline"
                   >
                     {p.title}
                   </Link>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-zinc-600">
                     {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
                     {shortUid(p.authorId)}
                   </p>
@@ -168,7 +168,7 @@ export function AdminDashboard() {
                     type="button"
                     disabled={busy}
                     onClick={() => approve(p.id)}
-                    className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white disabled:opacity-50"
+                    className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-[#ffffff] disabled:opacity-50"
                   >
                     승인
                   </button>
@@ -189,13 +189,13 @@ export function AdminDashboard() {
 
       {tab === "approved" && (
         <section className="space-y-3">
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-zinc-800">
             최근 공개 글 50개입니다. 삭제 시 댓글도 함께 지워집니다.
           </p>
           {approved.length === 0 && !error && (
-            <p className="text-sm text-zinc-500">공개된 글이 없습니다.</p>
+            <p className="text-sm text-zinc-700">공개된 글이 없습니다.</p>
           )}
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-zinc-200">
             {approved.map((p) => (
               <li
                 key={p.id}
@@ -204,11 +204,11 @@ export function AdminDashboard() {
                 <div className="min-w-0">
                   <Link
                     href={`/posts/${p.id}`}
-                    className="font-medium text-zinc-900 hover:underline"
+                    className="font-medium text-zinc-950 hover:underline"
                   >
                     {p.title}
                   </Link>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-zinc-600">
                     {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
                     {shortUid(p.authorId)}
                   </p>
