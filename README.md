@@ -10,10 +10,46 @@ Next.js(App Router), Tailwind CSS, Firebase(Auth + Firestore)로 구성했습니
 
 ## Firebase 콘솔 설정
 
-- **Authentication**: 이메일/비밀번호 제공업체 사용
+- **Authentication**: 아래 **카카오 + Firebase 로그인 설정** 참고 (OIDC)
 - **Firestore**: `firestore.rules`와 `firestore.indexes.json` 배포  
   (`firebase init` 후 `firebase deploy --only firestore` 또는 콘솔에서 규칙·인덱스 수동 반영)
 - **관리자**: Firestore에 `admins` 컬렉션을 만들고, 문서 ID를 관리자 계정의 **UID**로 한 빈 문서를 추가합니다. 해당 사용자에게 `/admin`과 승인 버튼이 보입니다.
+
+## 카카오 + Firebase 로그인 설정
+
+이 프로젝트는 `OAuthProvider("oidc.kakao")`를 사용합니다. **Firebase에 등록하는 OIDC 제공업체 ID가 코드와 같아야** 합니다.
+
+### 1) Firebase 콘솔 (먼저 리다이렉트 URI 확인)
+
+1. [Firebase Console](https://console.firebase.google.com/) → 프로젝트 선택  
+2. **빌드** → **Authentication** → **Sign-in method**  
+3. **OpenID Connect** 제공업체 **추가**를 선택하기 전에, 동일 화면/프로젝트 설정에서 **승인된 리다이렉트 URI** 목록에 나오는 값을 메모합니다.  
+   - 형태 예: `https://<프로젝트ID>.firebaseapp.com/__/auth/handler` (실제 값은 콘솔 기준)  
+4. 아래 2번에서 카카오 앱에 **동일한 URI**를 등록합니다.
+
+### 2) 카카오 개발자 콘솔
+
+1. [Kakao Developers](https://developers.kakao.com/) → 내 애플리케이션 → 앱 추가  
+2. **앱 키**에서 **REST API 키**를 확인합니다 (Firebase OIDC Client ID로 사용).  
+3. **제품 설정** → **카카오 로그인** 활성화  
+4. **Redirect URI**에 Firebase에서 복사한 **승인된 리다이렉트 URI**를 그대로 등록합니다.  
+5. **OpenID Connect**를 사용하는 경우, 카카오 문서에 따라 **OIDC** 관련 설정(동의 항목 등)을 맞춥니다.
+
+### 3) Firebase 콘솔 — OpenID Connect 제공업체
+
+1. **Authentication** → **Sign-in method** → **OpenID Connect** → **추가**  
+2. 다음을 맞춥니다.  
+   - **Provider ID**: `oidc.kakao` ← **반드시 이 값** (코드와 동일)  
+   - **Issuer (URL)**: `https://kauth.kakao.com`  
+   - **Client ID**: 카카오 앱의 **REST API 키**  
+   - **Client secret**: 카카오 앱에서 발급·활성화한 시크릿(앱에 따라 없을 수 있음 — 카카오 콘솔 기준)  
+3. 저장 후 제공업체를 **사용 설정**합니다.
+
+### 4) 로컬에서 확인
+
+1. `.env.local`에 Firebase 웹 설정이 들어갔는지 확인  
+2. `npm run dev` 후 `/login`에서 **카카오로 로그인**  
+3. `auth/operation-not-allowed`가 나오면 Firebase에서 OIDC 제공업체가 꺼져 있거나 Provider ID가 `oidc.kakao`가 아닌 경우가 많습니다.
 
 ## 데이터 모델
 
