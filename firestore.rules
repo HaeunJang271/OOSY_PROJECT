@@ -39,6 +39,7 @@ service cloud.firestore {
           'postId', 'content', 'authorId', 'createdAt'
         ])
         && canReadPostId(request.resource.data.postId);
+      allow delete: if isAdmin();
     }
 
     match /admins/{uid} {

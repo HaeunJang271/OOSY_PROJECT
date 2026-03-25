@@ -13,7 +13,7 @@ Next.js(App Router), Tailwind CSS, Firebase(Auth + Firestore)로 구성했습니
 - **Authentication**: 아래 **카카오 + Firebase 로그인 설정** 참고 (OIDC)
 - **Firestore**: `firestore.rules`와 `firestore.indexes.json` 배포  
   (`firebase init` 후 `firebase deploy --only firestore` 또는 콘솔에서 규칙·인덱스 수동 반영)
-- **관리자**: Firestore에 `admins` 컬렉션을 만들고, 문서 ID를 관리자 계정의 **UID**로 한 빈 문서를 추가합니다. 해당 사용자에게 `/admin`과 승인 버튼이 보입니다.
+- **관리자**: Firestore에 `admins` 컬렉션을 만들고, 문서 ID를 관리자 계정의 **UID**로 한 빈 문서를 추가합니다. `/admin`에서 **승인 대기** 승인·거부(삭제), **공개 글** 삭제(댓글 포함)가 가능합니다. 규칙 배포 후에만 동작합니다.
 
 ## 카카오 + Firebase 로그인 설정
 

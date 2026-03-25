@@ -1,0 +1,231 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  deletePostAsAdmin,
+  fetchApprovedRecent,
+  fetchPendingPosts,
+  setPostStatus,
+} from "@/lib/posts";
+import { formatDate, shortUid } from "@/lib/format";
+import type { Post } from "@/lib/types";
+import { useAuth } from "@/providers/AuthProvider";
+
+type Tab = "pending" | "approved";
+
+export function AdminDashboard() {
+  const { user, isAdmin, loading } = useAuth();
+  const [tab, setTab] = useState<Tab>("pending");
+  const [pending, setPending] = useState<Post[]>([]);
+  const [approved, setApproved] = useState<Post[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadPending = useCallback(async () => {
+    if (!isAdmin) return;
+    setError(null);
+    try {
+      const list = await fetchPendingPosts();
+      setPending(list);
+    } catch (e) {
+      console.error(e);
+      setError("대기 목록을 불러오지 못했습니다.");
+    }
+  }, [isAdmin]);
+
+  const loadApproved = useCallback(async () => {
+    if (!isAdmin) return;
+    setError(null);
+    try {
+      const list = await fetchApprovedRecent(50);
+      setApproved(list);
+    } catch (e) {
+      console.error(e);
+      setError("공개 글 목록을 불러오지 못했습니다.");
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!loading && isAdmin) {
+      void loadPending();
+      void loadApproved();
+    }
+  }, [loading, isAdmin, loadPending, loadApproved]);
+
+  async function approve(id: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      await setPostStatus(id, "approved");
+      setPending((prev) => prev.filter((p) => p.id !== id));
+      await loadApproved();
+    } catch (e) {
+      console.error(e);
+      setError("승인 처리에 실패했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removePost(id: string) {
+    if (!confirm("이 글과 댓글을 삭제할까요?")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await deletePostAsAdmin(id);
+      setPending((prev) => prev.filter((p) => p.id !== id));
+      setApproved((prev) => prev.filter((p) => p.id !== id));
+    } catch (e) {
+      console.error(e);
+      setError("삭제에 실패했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (loading) {
+    return <p className="text-sm text-zinc-500">확인 중…</p>;
+  }
+  if (!user) {
+    return (
+      <p className="text-sm text-zinc-600">
+        <Link href="/login" className="underline">
+          로그인
+        </Link>
+        이 필요합니다.
+      </p>
+    );
+  }
+  if (!isAdmin) {
+    return (
+      <p className="text-sm text-zinc-600">
+        관리자만 접근할 수 있습니다. Firestore{" "}
+        <code className="rounded bg-zinc-100 px-1">admins</code> 컬렉션에 문서 ID를 본인
+        계정 UID(
+        <span className="break-all">{user.uid}</span>)로 추가했는지 확인해 주세요.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-1">
+        <button
+          type="button"
+          onClick={() => setTab("pending")}
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+            tab === "pending"
+              ? "bg-white text-zinc-900 shadow-sm"
+              : "text-zinc-600"
+          }`}
+        >
+          승인 대기 ({pending.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("approved")}
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+            tab === "approved"
+              ? "bg-white text-zinc-900 shadow-sm"
+              : "text-zinc-600"
+          }`}
+        >
+          공개 글 관리
+        </button>
+      </div>
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {tab === "pending" && (
+        <section className="space-y-3">
+          <p className="text-sm text-zinc-600">
+            승인하면 홈에 노출됩니다. 거부는 글 삭제로 처리합니다.
+          </p>
+          {pending.length === 0 && !error && (
+            <p className="text-sm text-zinc-500">대기 중인 글이 없습니다.</p>
+          )}
+          <ul className="divide-y divide-zinc-100">
+            {pending.map((p) => (
+              <li
+                key={p.id}
+                className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={`/posts/${p.id}`}
+                    className="font-medium text-zinc-900 hover:underline"
+                  >
+                    {p.title}
+                  </Link>
+                  <p className="text-xs text-zinc-500">
+                    {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
+                    {shortUid(p.authorId)}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => approve(p.id)}
+                    className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white disabled:opacity-50"
+                  >
+                    승인
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => removePost(p.id)}
+                    className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
+                  >
+                    거부
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {tab === "approved" && (
+        <section className="space-y-3">
+          <p className="text-sm text-zinc-600">
+            최근 공개 글 50개입니다. 삭제 시 댓글도 함께 지워집니다.
+          </p>
+          {approved.length === 0 && !error && (
+            <p className="text-sm text-zinc-500">공개된 글이 없습니다.</p>
+          )}
+          <ul className="divide-y divide-zinc-100">
+            {approved.map((p) => (
+              <li
+                key={p.id}
+                className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={`/posts/${p.id}`}
+                    className="font-medium text-zinc-900 hover:underline"
+                  >
+                    {p.title}
+                  </Link>
+                  <p className="text-xs text-zinc-500">
+                    {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
+                    {shortUid(p.authorId)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => removePost(p.id)}
+                  className="shrink-0 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
+                >
+                  삭제
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+}

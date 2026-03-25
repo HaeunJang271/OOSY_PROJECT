@@ -14,6 +14,14 @@ function resolveCategory(raw: string | null): string {
   return CATEGORY_ALL;
 }
 
+function isIndexBuildingError(e: unknown): boolean {
+  const msg =
+    e && typeof e === "object" && "message" in e
+      ? String((e as { message?: string }).message)
+      : "";
+  return msg.includes("currently building") || msg.includes("building and cannot be used");
+}
+
 export function HomePosts() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,7 +51,13 @@ export function HomePosts() {
       setPosts(list);
     } catch (e) {
       console.error(e);
-      setError("글을 불러오지 못했습니다. 환경 변수와 Firestore 규칙을 확인해 주세요.");
+      if (isIndexBuildingError(e)) {
+        setError(
+          "Firestore 인덱스가 아직 생성 중입니다. 콘솔의 인덱스 탭에서 상태가 ‘사용 가능’이 될 때까지(보통 수 분) 기다린 뒤 새로고침해 주세요.",
+        );
+      } else {
+        setError("글을 불러오지 못했습니다. 환경 변수와 Firestore 규칙·인덱스를 확인해 주세요.");
+      }
       setPosts([]);
     } finally {
       setLoading(false);

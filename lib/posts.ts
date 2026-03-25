@@ -10,6 +10,7 @@ import {
   serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import type { Post, PostStatus } from "@/lib/types";
 import { CATEGORY_ALL } from "@/lib/constants";
@@ -58,6 +59,19 @@ export async function fetchPendingPosts(): Promise<Post[]> {
   return snap.docs.map((d) => mapPost(d.id, d.data()));
 }
 
+/** 관리자: 최근 승인 글만 (카테고리 필터 없음) */
+export async function fetchApprovedRecent(limitCount: number): Promise<Post[]> {
+  const db = getFirebaseDb();
+  const q = query(
+    collection(db, POSTS),
+    where("status", "==", "approved" as PostStatus),
+    orderBy("createdAt", "desc"),
+    limit(limitCount),
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => mapPost(d.id, d.data()));
+}
+
 export async function fetchPostById(id: string): Promise<Post | null> {
   const db = getFirebaseDb();
   const ref = doc(db, POSTS, id);
@@ -87,4 +101,18 @@ export async function createPost(input: {
 export async function setPostStatus(postId: string, status: PostStatus): Promise<void> {
   const db = getFirebaseDb();
   await updateDoc(doc(db, POSTS, postId), { status });
+}
+
+const COMMENTS = "comments";
+
+/** 관리자: 글 + 해당 글의 댓글 일괄 삭제 */
+export async function deletePostAsAdmin(postId: string): Promise<void> {
+  const db = getFirebaseDb();
+  const commentsSnap = await getDocs(
+    query(collection(db, COMMENTS), where("postId", "==", postId)),
+  );
+  const batch = writeBatch(db);
+  commentsSnap.docs.forEach((d) => batch.delete(d.ref));
+  batch.delete(doc(db, POSTS, postId));
+  await batch.commit();
 }
