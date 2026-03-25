@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function canReadPostId(postId) {
+      let p = get(/databases/$(database)/documents/posts/$(postId));
+      return p.data.status == 'approved'
+        || (signedIn() && p.data.authorId == request.auth.uid)
+        || isAdmin();
+    }
+
+    match /posts/{postId} {
+      allow read: if resource.data.status == 'approved'
+        || (signedIn() && resource.data.authorId == request.auth.uid)
+        || isAdmin();
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.keys().hasAll([
+          'title', 'content', 'category', 'authorId', 'status', 'createdAt'
+        ]);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.authorId == request.auth.uid);
+    }
+
+    match /comments/{commentId} {
+      allow read: if canReadPostId(resource.data.postId);
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'postId', 'content', 'authorId', 'createdAt'
+        ])
+        && canReadPostId(request.resource.data.postId);
+    }
+
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}
