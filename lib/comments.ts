@@ -1,6 +1,8 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   getDocs,
   orderBy,
   query,
@@ -46,4 +48,9 @@ export async function addComment(input: {
     createdAt: serverTimestamp(),
   });
   return ref.id;
+}
+
+export async function deleteComment(commentId: string): Promise<void> {
+  const db = getFirebaseDb();
+  await deleteDoc(doc(db, COMMENTS, commentId));
 }

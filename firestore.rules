@@ -14,6 +14,20 @@ service cloud.firestore {
         || (signedIn() && p.data.authorId == request.auth.uid)
         || isAdmin();
     }
+    function commentsEnabledForPostId(postId) {
+      let p = get(/databases/$(database)/documents/posts/$(postId));
+      // 필드가 없으면 기본 ON으로 취급
+      return !(p.data.commentsEnabled == false);
+    }
+
+    function validNickname(nickname) {
+      // 2~12자, 한글/영문/숫자/언더바(_)/공백만 (기타 특수문자 금지)
+      return nickname is string
+        && nickname.matches('^[A-Za-z0-9가-힣_ ]{2,12}$');
+    }
+    function canUseAdminWord(nickname) {
+      return isAdmin() || !nickname.matches('.*관리자.*');
+    }
 
     match /posts/{postId} {
       allow read: if resource.data.status == 'approved'
@@ -23,7 +37,7 @@ service cloud.firestore {
         && request.resource.data.authorId == request.auth.uid
         && request.resource.data.status == 'pending'
         && request.resource.data.keys().hasAll([
-          'title', 'content', 'category', 'authorId', 'status', 'createdAt'
+          'title', 'content', 'category', 'authorId', 'status', 'createdAt', 'commentsEnabled'
         ]);
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
@@ -38,13 +52,51 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll([
           'postId', 'content', 'authorId', 'createdAt'
         ])
-        && canReadPostId(request.resource.data.postId);
+        && canReadPostId(request.resource.data.postId)
+        && commentsEnabledForPostId(request.resource.data.postId);
       allow delete: if isAdmin();
     }
 
     match /admins/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       allow write: if false;
+    }
+
+    // 사용자 프로필(닉네임)
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasAny(['nickname'])
+        && (!('nickname' in request.resource.data)
+          || (
+            validNickname(request.resource.data.nickname)
+            && canUseAdminWord(request.resource.data.nickname)
+          ));
+      // 본인 프로필 갱신 허용 (닉네임 변경 가능)
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && (
+          !('nickname' in request.resource.data)
+          || (
+            validNickname(request.resource.data.nickname)
+            && canUseAdminWord(request.resource.data.nickname)
+          )
+        );
+      allow delete: if false;
+    }
+
+    // 닉네임 중복 방지용 맵
+    match /nicknames/{nickname} {
+      // 중복 체크를 위해(트랜잭션에서 get 필요) 로그인 사용자에 한해 read 허용
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && validNickname(nickname)
+        && canUseAdminWord(nickname)
+        && !exists(/databases/$(database)/documents/nicknames/$(nickname))
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
   }
 }

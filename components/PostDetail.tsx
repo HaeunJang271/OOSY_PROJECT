@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchCommentsForPost, addComment } from "@/lib/comments";
+import { fetchCommentsForPost, addComment, deleteComment } from "@/lib/comments";
 import { fetchPostById } from "@/lib/posts";
 import { formatDate, shortUid } from "@/lib/format";
 import type { Comment, Post } from "@/lib/types";
 import { useAuth } from "@/providers/AuthProvider";
+import { fetchNicknamesByUids } from "@/lib/profile";
 
 type Props = { postId: string };
 
@@ -17,13 +18,17 @@ export function PostDetail({ postId }: Props) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [sending, setSending] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [nicknameByUid, setNicknameByUid] = useState<Record<string, string>>({});
 
   const canView =
     post &&
     (post.status === "approved" ||
       (user && post.authorId === user.uid) ||
       (user && isAdmin));
+
+  const commentsEnabled = post?.commentsEnabled !== false;
 
   const load = useCallback(async () => {
     setError(null);
@@ -42,13 +47,20 @@ export function PostDetail({ postId }: Props) {
       if (viewer) {
         const list = await fetchCommentsForPost(postId);
         setComments(list);
+        const map = await fetchNicknamesByUids([
+          p.authorId,
+          ...list.map((c) => c.authorId),
+        ]);
+        setNicknameByUid(map);
       } else {
         setComments([]);
+        setNicknameByUid({});
       }
     } catch (e) {
       console.error(e);
       setError("불러오기에 실패했습니다.");
       setPost(null);
+      setNicknameByUid({});
     } finally {
       setLoadingPost(false);
     }
@@ -70,11 +82,37 @@ export function PostDetail({ postId }: Props) {
       setCommentText("");
       const list = await fetchCommentsForPost(postId);
       setComments(list);
+      const map = await fetchNicknamesByUids([
+        post.authorId,
+        ...list.map((c) => c.authorId),
+      ]);
+      setNicknameByUid(map);
     } catch (err) {
       console.error(err);
       setError("댓글 저장에 실패했습니다.");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleDeleteComment(commentId: string) {
+    if (!confirm("댓글을 삭제할까요?")) return;
+    setDeletingId(commentId);
+    setError(null);
+    try {
+      await deleteComment(commentId);
+      const list = comments.filter((c) => c.id !== commentId);
+      setComments(list);
+      const map = await fetchNicknamesByUids([
+        post.authorId,
+        ...list.map((c) => c.authorId),
+      ]);
+      setNicknameByUid(map);
+    } catch (err) {
+      console.error(err);
+      setError("댓글 삭제에 실패했습니다.");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -110,7 +148,8 @@ export function PostDetail({ postId }: Props) {
           {post.title}
         </h1>
         <p className="mt-3 text-xs font-medium text-neutral-700">
-          {formatDate(post.createdAt)} · 작성자 {shortUid(post.authorId)}
+          {formatDate(post.createdAt)} · 작성자{" "}
+          {nicknameByUid[post.authorId] ?? shortUid(post.authorId)}
           {post.status === "pending" && (
             <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-amber-900">
               승인 대기
@@ -133,14 +172,31 @@ export function PostDetail({ postId }: Props) {
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-neutral-950"
             >
               <p className="whitespace-pre-wrap leading-relaxed">{c.content}</p>
-              <p className="mt-1.5 text-xs font-medium text-neutral-600">
-                {shortUid(c.authorId)} · {formatDate(c.createdAt)}
-              </p>
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <p className="text-xs font-medium text-neutral-600">
+                  {nicknameByUid[c.authorId] ?? shortUid(c.authorId)} ·{" "}
+                  {formatDate(c.createdAt)}
+                </p>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteComment(c.id)}
+                    disabled={deletingId === c.id}
+                    className="rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    {deletingId === c.id ? "삭제 중…" : "삭제"}
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
 
-        {user ? (
+        {!commentsEnabled ? (
+          <p className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-neutral-800">
+            작성자가 댓글 기능을 꺼두었습니다.
+          </p>
+        ) : user ? (
           <form onSubmit={handleComment} className="mt-4 space-y-2">
             <label htmlFor="comment" className="sr-only">
               댓글 작성

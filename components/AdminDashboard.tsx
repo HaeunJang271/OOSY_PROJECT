@@ -11,6 +11,7 @@ import {
 import { formatDate, shortUid } from "@/lib/format";
 import type { Post } from "@/lib/types";
 import { useAuth } from "@/providers/AuthProvider";
+import { fetchNicknamesByUids } from "@/lib/profile";
 
 type Tab = "pending" | "approved";
 
@@ -19,8 +20,18 @@ export function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("pending");
   const [pending, setPending] = useState<Post[]>([]);
   const [approved, setApproved] = useState<Post[]>([]);
+  const [nicknameByUid, setNicknameByUid] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const loadNicknames = useCallback(async (posts: Post[]) => {
+    try {
+      const map = await fetchNicknamesByUids(posts.map((p) => p.authorId));
+      setNicknameByUid((prev) => ({ ...prev, ...map }));
+    } catch {
+      // 닉네임 조회 실패 시 UID fallback
+    }
+  }, []);
 
   const loadPending = useCallback(async () => {
     if (!isAdmin) return;
@@ -28,11 +39,12 @@ export function AdminDashboard() {
     try {
       const list = await fetchPendingPosts();
       setPending(list);
+      await loadNicknames(list);
     } catch (e) {
       console.error(e);
       setError("대기 목록을 불러오지 못했습니다.");
     }
-  }, [isAdmin]);
+  }, [isAdmin, loadNicknames]);
 
   const loadApproved = useCallback(async () => {
     if (!isAdmin) return;
@@ -40,11 +52,12 @@ export function AdminDashboard() {
     try {
       const list = await fetchApprovedRecent(50);
       setApproved(list);
+      await loadNicknames(list);
     } catch (e) {
       console.error(e);
       setError("공개 글 목록을 불러오지 못했습니다.");
     }
-  }, [isAdmin]);
+  }, [isAdmin, loadNicknames]);
 
   useEffect(() => {
     if (!loading && isAdmin) {
@@ -160,7 +173,7 @@ export function AdminDashboard() {
                   </Link>
                   <p className="text-xs text-zinc-600">
                     {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
-                    {shortUid(p.authorId)}
+                    {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -210,7 +223,7 @@ export function AdminDashboard() {
                   </Link>
                   <p className="text-xs text-zinc-600">
                     {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
-                    {shortUid(p.authorId)}
+                    {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
                   </p>
                 </div>
                 <button

@@ -27,6 +27,10 @@ function mapPost(id: string, data: Record<string, unknown>): Post {
     authorId: String(data.authorId ?? ""),
     createdAt: data.createdAt as Post["createdAt"],
     status: (data.status as PostStatus) ?? "pending",
+    commentsEnabled:
+      typeof data.commentsEnabled === "boolean"
+        ? data.commentsEnabled
+        : undefined,
   };
 }
 
@@ -85,6 +89,7 @@ export async function createPost(input: {
   content: string;
   category: string;
   authorId: string;
+  commentsEnabled: boolean;
 }): Promise<string> {
   const db = getFirebaseDb();
   const ref = await addDoc(collection(db, POSTS), {
@@ -94,6 +99,7 @@ export async function createPost(input: {
     authorId: input.authorId,
     status: "pending",
     createdAt: serverTimestamp(),
+    commentsEnabled: Boolean(input.commentsEnabled),
   });
   return ref.id;
 }

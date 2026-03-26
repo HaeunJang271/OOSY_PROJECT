@@ -12,6 +12,7 @@ export function WritePostForm() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState<string>(POST_CATEGORIES[0]!);
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +31,7 @@ export function WritePostForm() {
         content,
         category,
         authorId: user.uid,
+        commentsEnabled,
       });
       router.push(`/posts/${id}`);
     } catch (err) {
@@ -87,6 +89,22 @@ export function WritePostForm() {
           className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-950 placeholder:text-zinc-500"
           placeholder="나누고 싶은 내용을 적어 주세요."
         />
+      </div>
+      <div className="rounded-lg border border-zinc-200 bg-white p-3">
+        <label className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-neutral-900">댓글(질문/답변)</p>
+            <p className="mt-0.5 text-xs text-neutral-600">
+              OFF로 제출하면 다른 사용자는 댓글을 달 수 없습니다.
+            </p>
+          </div>
+          <input
+            type="checkbox"
+            checked={commentsEnabled}
+            onChange={(e) => setCommentsEnabled(e.target.checked)}
+            className="h-5 w-5 accent-zinc-900"
+          />
+        </label>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <p className="text-xs text-zinc-700">

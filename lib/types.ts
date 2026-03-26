@@ -10,6 +10,7 @@ export interface Post {
   authorId: string;
   createdAt: Timestamp | Date;
   status: PostStatus;
+  commentsEnabled?: boolean;
 }
 
 export interface Comment {
@@ -18,4 +19,9 @@ export interface Comment {
   content: string;
   authorId: string;
   createdAt: Timestamp | Date;
+}
+
+export interface UserProfile {
+  uid: string;
+  nickname?: string;
 }
