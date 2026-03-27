@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { signOut } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
+import { MyPendingPosts } from "@/components/MyPendingPosts";
 import { useAuth } from "@/providers/AuthProvider";
 
 export default function MyPage() {
@@ -81,6 +82,9 @@ export default function MyPage() {
           <p className="text-sm font-medium text-amber-800">관리자 계정입니다.</p>
         )}
       </div>
+
+      <MyPendingPosts authorId={user.uid} />
+
       <button
         type="button"
         onClick={handleLogout}

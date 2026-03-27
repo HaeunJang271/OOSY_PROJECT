@@ -13,7 +13,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import type { Post, PostStatus } from "@/lib/types";
-import { CATEGORY_ALL } from "@/lib/constants";
+import { CATEGORY_ALL, REGION_ALL } from "@/lib/constants";
 import { getFirebaseDb } from "@/lib/firebase";
 
 const POSTS = "posts";
@@ -24,6 +24,7 @@ function mapPost(id: string, data: Record<string, unknown>): Post {
     title: String(data.title ?? ""),
     content: String(data.content ?? ""),
     category: String(data.category ?? ""),
+    region: String(data.region ?? "전국"),
     authorId: String(data.authorId ?? ""),
     createdAt: data.createdAt as Post["createdAt"],
     status: (data.status as PostStatus) ?? "pending",
@@ -34,21 +35,55 @@ function mapPost(id: string, data: Record<string, unknown>): Post {
   };
 }
 
-export async function fetchApprovedPosts(category?: string): Promise<Post[]> {
+const APPROVED_FETCH_LIMIT = 400;
+
+export type ApprovedPostFilters = {
+  category?: string;
+  region?: string;
+};
+
+export async function fetchApprovedPosts(
+  filters: ApprovedPostFilters = {},
+): Promise<Post[]> {
   const db = getFirebaseDb();
   const postsRef = collection(db, POSTS);
   const statusApproved = where("status", "==", "approved" as PostStatus);
-  const q =
-    category && category !== CATEGORY_ALL
-      ? query(
-          postsRef,
-          statusApproved,
-          where("category", "==", category),
-          orderBy("createdAt", "desc"),
-        )
-      : query(postsRef, statusApproved, orderBy("createdAt", "desc"));
+
+  const category =
+    filters.category && filters.category !== CATEGORY_ALL
+      ? filters.category
+      : undefined;
+  const region =
+    filters.region && filters.region !== REGION_ALL ? filters.region : undefined;
+
+  const onlyCategory = Boolean(category) && !region;
+
+  if (onlyCategory) {
+    const q = query(
+      postsRef,
+      statusApproved,
+      where("category", "==", category),
+      orderBy("createdAt", "desc"),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => mapPost(d.id, d.data()));
+  }
+
+  const q = query(
+    postsRef,
+    statusApproved,
+    orderBy("createdAt", "desc"),
+    limit(APPROVED_FETCH_LIMIT),
+  );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => mapPost(d.id, d.data()));
+  let list = snap.docs.map((d) => mapPost(d.id, d.data()));
+  if (category) {
+    list = list.filter((p) => p.category === category);
+  }
+  if (region) {
+    list = list.filter((p) => p.region === region);
+  }
+  return list;
 }
 
 export async function fetchPendingPosts(): Promise<Post[]> {
@@ -76,6 +111,20 @@ export async function fetchApprovedRecent(limitCount: number): Promise<Post[]> {
   return snap.docs.map((d) => mapPost(d.id, d.data()));
 }
 
+/** 내가 작성한 승인 대기 글 (마이페이지) */
+export async function fetchMyPendingPosts(authorId: string): Promise<Post[]> {
+  const db = getFirebaseDb();
+  const q = query(
+    collection(db, POSTS),
+    where("authorId", "==", authorId),
+    where("status", "==", "pending" as PostStatus),
+    orderBy("createdAt", "desc"),
+    limit(50),
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => mapPost(d.id, d.data()));
+}
+
 export async function fetchPostById(id: string): Promise<Post | null> {
   const db = getFirebaseDb();
   const ref = doc(db, POSTS, id);
@@ -88,6 +137,7 @@ export async function createPost(input: {
   title: string;
   content: string;
   category: string;
+  region: string;
   authorId: string;
   commentsEnabled: boolean;
 }): Promise<string> {
@@ -96,6 +146,7 @@ export async function createPost(input: {
     title: input.title.trim(),
     content: input.content.trim(),
     category: input.category,
+    region: input.region,
     authorId: input.authorId,
     status: "pending",
     createdAt: serverTimestamp(),

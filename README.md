@@ -53,7 +53,9 @@ Next.js(App Router), Tailwind CSS, Firebase(Auth + Firestore)로 구성했습니
 
 ## 데이터 모델
 
-- `posts`: `title`, `content`, `category`, `authorId`, `createdAt`, `status` (`pending` | `approved`)
-- `comments`: `postId`, `content`, `authorId`, `createdAt`
+- `posts`: `title`, `content`(마크다운), `category`, `region`, `authorId`, `createdAt`, `status` (`pending` 또는 `approved`), `commentsEnabled`
+- `comments`: `postId`, `content`(마크다운), `authorId`, `createdAt`, `parentId` (최상위 스레드는 `null`)
 
-신규 글은 항상 `pending`이며, 관리자만 `status`를 `approved`로 바꿀 수 있습니다(보안 규칙 반영).
+신규 글은 항상 `pending`이며, 관리자만 `status`를 `approved`로 바꿀 수 있습니다(보안 규칙 반영).  
+**승인된 글**에만 새 댓글이 달리도록 `firestore.rules`에서 제한합니다(`postAllowsNewComments`).  
+마이페이지의 「승인 대기」 목록 등은 `authorId` + `status` + `createdAt` 복합 인덱스가 필요합니다(`firestore.indexes.json` 배포).

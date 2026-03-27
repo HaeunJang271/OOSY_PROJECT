@@ -7,6 +7,8 @@ export interface Post {
   title: string;
   content: string;
   category: string;
+  /** 시·도 또는 전국 */
+  region: string;
   authorId: string;
   createdAt: Timestamp | Date;
   status: PostStatus;
@@ -19,6 +21,8 @@ export interface Comment {
   content: string;
   authorId: string;
   createdAt: Timestamp | Date;
+  /** null·없음 = 최상위 질문/글 스레드 */
+  parentId?: string | null;
 }
 
 export interface UserProfile {

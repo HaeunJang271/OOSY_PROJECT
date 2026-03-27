@@ -158,41 +158,51 @@ export function AdminDashboard() {
           {pending.length === 0 && !error && (
             <p className="text-sm text-zinc-700">대기 중인 글이 없습니다.</p>
           )}
-          <ul className="divide-y divide-zinc-200">
+          <ul className="space-y-3">
             {pending.map((p) => (
               <li
                 key={p.id}
-                className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
+                className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
               >
-                <div className="min-w-0">
-                  <Link
-                    href={`/posts/${p.id}`}
-                    className="font-medium text-zinc-950 hover:underline"
-                  >
-                    {p.title}
-                  </Link>
-                  <p className="text-xs text-zinc-600">
-                    {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
-                    {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
-                  </p>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => approve(p.id)}
-                    className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-[#ffffff] disabled:opacity-50"
-                  >
-                    승인
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => removePost(p.id)}
-                    className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
-                  >
-                    거부
-                  </button>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
+                        승인 대기
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        {p.category} · {p.region}
+                      </span>
+                    </div>
+                    <Link
+                      href={`/posts/${p.id}`}
+                      className="font-medium text-zinc-950 hover:underline"
+                    >
+                      {p.title}
+                    </Link>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      {formatDate(p.createdAt)} · 작성자{" "}
+                      {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-2 sm:pl-4">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => approve(p.id)}
+                      className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-[#ffffff] disabled:opacity-50"
+                    >
+                      승인
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => removePost(p.id)}
+                      className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
+                    >
+                      거부
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}
@@ -208,32 +218,44 @@ export function AdminDashboard() {
           {approved.length === 0 && !error && (
             <p className="text-sm text-zinc-700">공개된 글이 없습니다.</p>
           )}
-          <ul className="divide-y divide-zinc-200">
+          <ul className="space-y-3">
             {approved.map((p) => (
               <li
                 key={p.id}
-                className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
+                className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
               >
-                <div className="min-w-0">
-                  <Link
-                    href={`/posts/${p.id}`}
-                    className="font-medium text-zinc-950 hover:underline"
-                  >
-                    {p.title}
-                  </Link>
-                  <p className="text-xs text-zinc-600">
-                    {p.category} · {formatDate(p.createdAt)} · 작성자{" "}
-                    {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
-                  </p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900">
+                        공개
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        {p.category} · {p.region}
+                      </span>
+                    </div>
+                    <Link
+                      href={`/posts/${p.id}`}
+                      className="font-medium text-zinc-950 hover:underline"
+                    >
+                      {p.title}
+                    </Link>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      {formatDate(p.createdAt)} · 작성자{" "}
+                      {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
+                    </p>
+                  </div>
+                  <div className="shrink-0 sm:pl-4">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => removePost(p.id)}
+                      className="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50 sm:w-auto"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => removePost(p.id)}
-                  className="shrink-0 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
-                >
-                  삭제
-                </button>
               </li>
             ))}
           </ul>

@@ -23,3 +23,12 @@ export function shortUid(uid: string): string {
   if (!uid) return "";
   return uid.length <= 8 ? uid : `${uid.slice(0, 6)}…`;
 }
+
+export function timestampMs(value: Timestamp | Date | unknown): number {
+  if (!value) return 0;
+  if (typeof (value as Timestamp)?.toDate === "function") {
+    return (value as Timestamp).toDate().getTime();
+  }
+  if (value instanceof Date) return value.getTime();
+  return 0;
+}
