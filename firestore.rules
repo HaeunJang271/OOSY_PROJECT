@@ -39,8 +39,16 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll([
           'title', 'content', 'category', 'region', 'authorId', 'status', 'createdAt', 'commentsEnabled'
         ]);
-      allow update: if isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow update: if (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+        || (signedIn()
+          && resource.data.authorId == request.auth.uid
+          && resource.data.status == 'pending'
+          && request.resource.data.authorId == resource.data.authorId
+          && request.resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'title', 'content', 'category', 'region', 'commentsEnabled', 'updatedAt'
+          ]));
       allow delete: if isAdmin()
         || (signedIn() && resource.data.authorId == request.auth.uid);
     }
