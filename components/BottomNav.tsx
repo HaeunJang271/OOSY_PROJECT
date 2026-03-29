@@ -42,7 +42,7 @@ export function BottomNav() {
       className="fixed bottom-0 left-0 right-0 z-20 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur"
       aria-label="하단 메뉴"
     >
-      <ul className="mx-auto flex max-w-2xl items-stretch justify-around">
+      <ul className="mx-auto flex w-full min-w-0 max-w-2xl items-stretch justify-around">
         {items.map(({ href, label, active }) => (
           <li key={href} className="min-w-0 flex-1 border-r border-zinc-200 last:border-r-0">
             <Link

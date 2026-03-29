@@ -208,7 +208,7 @@ function ReplyBox({
         onChange={(e) => setText(e.target.value)}
         rows={3}
         className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-500"
-        placeholder="마크다운을 쓸 수 있어요. 짧게 답해 주세요."
+        placeholder="짧게 답해 주세요."
       />
       <div className="mt-2 flex flex-wrap gap-2">
         <button

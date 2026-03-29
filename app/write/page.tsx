@@ -15,7 +15,7 @@ export default function WritePage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl flex-1 px-4 py-8">
+      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
         <p className="text-sm text-zinc-700">확인 중…</p>
       </div>
     );
@@ -25,7 +25,7 @@ export default function WritePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl flex-1 px-4 py-8">
+    <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
       <h1 className="mb-6 text-xl font-semibold text-zinc-950">글쓰기</h1>
       <WritePostForm />
     </div>

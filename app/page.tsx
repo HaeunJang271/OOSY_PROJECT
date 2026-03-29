@@ -3,7 +3,7 @@ import { HomePosts } from "@/components/HomePosts";
 
 export default function HomePage() {
   return (
-    <div className="mx-auto max-w-2xl flex-1 px-4 py-8">
+    <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-neutral-950">
           학교 밖 청소년 정보·강좌

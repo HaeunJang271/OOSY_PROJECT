@@ -15,7 +15,7 @@ export default function MyPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
         <p className="text-sm text-neutral-700">확인 중…</p>
       </div>
     );
@@ -23,7 +23,7 @@ export default function MyPage() {
 
   if (!user) {
     return (
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
         <h1 className="mb-2 text-xl font-semibold text-neutral-950">마이페이지</h1>
         <p className="mb-6 text-sm text-neutral-800">
           로그인하면 내 정보를 확인할 수 있습니다.
@@ -39,7 +39,7 @@ export default function MyPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+    <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
       <h1 className="mb-6 text-xl font-semibold text-neutral-950">마이페이지</h1>
       <div className="w-full space-y-4 rounded-lg border border-zinc-200 bg-white p-3">
         <div>
