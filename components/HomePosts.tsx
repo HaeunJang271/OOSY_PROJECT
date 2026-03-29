@@ -155,34 +155,36 @@ export function HomePosts() {
         <p className="text-sm text-neutral-800">아직 승인된 글이 없습니다.</p>
       )}
 
-      <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
-        {posts.map((p) => (
-          <li key={p.id} className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4">
-            <Link
-              href={`/posts/${p.id}`}
-              className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
-            >
-              <div className="mb-1.5 flex flex-wrap gap-1.5">
-                <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
-                  {p.category}
-                </span>
-                <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-950">
-                  {p.region}
-                </span>
-              </div>
-              <h2 className="text-lg font-semibold leading-snug text-neutral-950">
-                {p.title}
-              </h2>
-              <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-800">
-                {plainTextExcerpt(p.content)}
-              </p>
-              <p className="mt-2 text-xs font-medium text-neutral-600">
-                {formatDate(p.createdAt)}
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {posts.length > 0 && (
+        <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
+          {posts.map((p) => (
+            <li key={p.id} className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4">
+              <Link
+                href={`/posts/${p.id}`}
+                className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
+              >
+                <div className="mb-1.5 flex flex-wrap gap-1.5">
+                  <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
+                    {p.category}
+                  </span>
+                  <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-950">
+                    {p.region}
+                  </span>
+                </div>
+                <h2 className="text-lg font-semibold leading-snug text-neutral-950">
+                  {p.title}
+                </h2>
+                <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-800">
+                  {plainTextExcerpt(p.content)}
+                </p>
+                <p className="mt-2 text-xs font-medium text-neutral-600">
+                  {formatDate(p.createdAt)}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

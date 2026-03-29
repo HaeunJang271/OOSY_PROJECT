@@ -57,7 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setNickname(n);
       setNeedsNickname(!n);
     } catch {
-      // 네트워크/권한 문제 등은 UX상 닉네임 미설정으로 강제하지 않음
       setNickname(null);
       setNeedsNickname(false);
     }
@@ -84,7 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const snap = await getDoc(doc(getFirebaseDb(), "admins", u.uid));
           setIsAdmin(snap.exists());
         } catch {
-          // 오프라인·일시 네트워크 실패 시 관리자 여부만 알 수 없음 → 비관리자로 처리
           setIsAdmin(false);
         }
         try {

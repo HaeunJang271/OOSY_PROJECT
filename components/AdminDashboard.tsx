@@ -127,18 +127,18 @@ export function AdminDashboard() {
         <button
           type="button"
           onClick={() => setTab("pending")}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "pending"
               ? "bg-white text-zinc-950 shadow-sm"
               : "text-zinc-800"
           }`}
         >
-          승인 대기 ({pending.length})
+          글 승인 대기 ({pending.length})
         </button>
         <button
           type="button"
           onClick={() => setTab("approved")}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "approved"
               ? "bg-white text-zinc-950 shadow-sm"
               : "text-zinc-800"

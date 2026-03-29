@@ -20,13 +20,13 @@ service cloud.firestore {
       return p.data.status == 'approved' && !(p.data.commentsEnabled == false);
     }
 
+    /** 관리자_ 형식은 admins 문서가 있는 요청만 허용 */
     function validNickname(nickname) {
-      // 2~12자, 한글/영문/숫자/언더바(_)/공백만 (기타 특수문자 금지)
       return nickname is string
-        && nickname.matches('^[A-Za-z0-9가-힣_ ]{2,12}$');
-    }
-    function canUseAdminWord(nickname) {
-      return isAdmin() || !nickname.matches('.*관리자.*');
+        && (nickname.matches('^학밖청_[가-힣A-Za-z0-9]{2,3}$')
+          || nickname.matches('^전문가_[가-힣A-Za-z0-9]{2,3}$')
+          || (isAdmin()
+            && nickname.matches('^관리자_[가-힣A-Za-z0-9]{2,3}$')));
     }
 
     match /posts/{postId} {
@@ -58,41 +58,33 @@ service cloud.firestore {
     }
 
     match /admins/{uid} {
-      allow read: if signedIn() && request.auth.uid == uid;
-      allow write: if false;
+      allow read: if signedIn()
+        && (request.auth.uid == uid || isAdmin());
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+      allow update: if false;
     }
 
-    // 사용자 프로필(닉네임)
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.keys().hasAny(['nickname'])
         && (!('nickname' in request.resource.data)
-          || (
-            validNickname(request.resource.data.nickname)
-            && canUseAdminWord(request.resource.data.nickname)
-          ));
-      // 본인 프로필 갱신 허용 (닉네임 변경 가능)
+          || validNickname(request.resource.data.nickname));
       allow update: if signedIn()
         && request.auth.uid == uid
         && (
           !('nickname' in request.resource.data)
-          || (
-            validNickname(request.resource.data.nickname)
-            && canUseAdminWord(request.resource.data.nickname)
-          )
+          || validNickname(request.resource.data.nickname)
         );
       allow delete: if false;
     }
 
-    // 닉네임 중복 방지용 맵
     match /nicknames/{nickname} {
-      // 중복 체크를 위해(트랜잭션에서 get 필요) 로그인 사용자에 한해 read 허용
       allow read: if signedIn();
       allow create: if signedIn()
         && validNickname(nickname)
-        && canUseAdminWord(nickname)
         && !exists(/databases/$(database)/documents/nicknames/$(nickname))
         && request.resource.data.uid == request.auth.uid;
       allow update: if false;
