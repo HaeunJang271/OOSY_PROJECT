@@ -158,64 +158,66 @@ export function AdminDashboard() {
           {pending.length === 0 && !error && (
             <p className="text-sm text-zinc-700">대기 중인 글이 없습니다.</p>
           )}
-          <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
-            {pending.map((p) => (
-              <li
-                key={p.id}
-                className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-1.5 flex flex-wrap gap-1.5">
-                      <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
-                        승인 대기
-                      </span>
-                      <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
-                        {p.category}
-                      </span>
-                      <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-950">
-                        {p.region}
-                      </span>
+          {pending.length > 0 && (
+            <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
+              {pending.map((p) => (
+                <li
+                  key={p.id}
+                  className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1.5 flex flex-wrap gap-1.5">
+                        <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
+                          승인 대기
+                        </span>
+                        <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
+                          {p.category}
+                        </span>
+                        <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-950">
+                          {p.region}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/posts/${p.id}`}
+                        className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
+                      >
+                        <h2 className="text-lg font-semibold leading-snug text-neutral-950 hover:underline">
+                          {p.title}
+                        </h2>
+                      </Link>
+                      <div className="mt-2 flex items-baseline justify-between gap-2 text-xs font-medium text-neutral-600">
+                        <span className="min-w-0 shrink">
+                          {formatDate(p.createdAt)}
+                        </span>
+                        <span className="shrink-0 text-right text-neutral-700">
+                          {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
+                        </span>
+                      </div>
                     </div>
-                    <Link
-                      href={`/posts/${p.id}`}
-                      className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
-                    >
-                      <h2 className="text-lg font-semibold leading-snug text-neutral-950 hover:underline">
-                        {p.title}
-                      </h2>
-                    </Link>
-                    <div className="mt-2 flex items-baseline justify-between gap-2 text-xs font-medium text-neutral-600">
-                      <span className="min-w-0 shrink">
-                        {formatDate(p.createdAt)}
-                      </span>
-                      <span className="shrink-0 text-right text-neutral-700">
-                        {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
-                      </span>
+                    <div className="flex shrink-0 flex-wrap justify-start gap-2 sm:pt-0.5">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => approve(p.id)}
+                        className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-[#ffffff] disabled:opacity-50"
+                      >
+                        승인
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => removePost(p.id)}
+                        className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
+                      >
+                        거부
+                      </button>
                     </div>
                   </div>
-                  <div className="flex shrink-0 flex-wrap justify-start gap-2 sm:pt-0.5">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => approve(p.id)}
-                      className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-[#ffffff] disabled:opacity-50"
-                    >
-                      승인
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => removePost(p.id)}
-                      className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
-                    >
-                      거부
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
 
