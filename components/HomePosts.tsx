@@ -11,7 +11,6 @@ import {
   REGIONS,
 } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
-import { plainTextExcerpt } from "@/lib/markdown";
 import type { Post } from "@/lib/types";
 
 function resolveCategory(raw: string | null): string {
@@ -174,9 +173,6 @@ export function HomePosts() {
                 <h2 className="text-lg font-semibold leading-snug text-neutral-950">
                   {p.title}
                 </h2>
-                <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-800">
-                  {plainTextExcerpt(p.content)}
-                </p>
                 <p className="mt-2 text-xs font-medium text-neutral-600">
                   {formatDate(p.createdAt)}
                 </p>
