@@ -1,16 +1,19 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   addComment,
+  collectSubtreeIds,
   deleteCommentTree,
   fetchCommentsForPost,
+  updateComment,
 } from "@/lib/comments";
 import { formatDate, shortUid, timestampMs } from "@/lib/format";
 import type { Comment, Post } from "@/lib/types";
 import { useAuth } from "@/providers/AuthProvider";
 import { fetchNicknamesByUids } from "@/lib/profile";
+import { CommentActionsMenu } from "@/components/CommentActionsMenu";
 import { MarkdownContent } from "@/components/MarkdownContent";
 
 type Props = {
@@ -43,7 +46,8 @@ type ThreadNodeProps = {
   replyingToId: string | null;
   setReplyingToId: (id: string | null) => void;
   onSubmitReply: (parentId: string | null, text: string) => Promise<void>;
-  onDeleteTree: (commentId: string) => Promise<void>;
+  onCommentDelete: (comment: Comment) => Promise<void>;
+  onSaveCommentEdit: (comment: Comment, content: string) => Promise<void>;
   busyId: string | null;
   userId: string | undefined;
   isAdmin: boolean;
@@ -60,7 +64,8 @@ function ThreadNode({
   replyingToId,
   setReplyingToId,
   onSubmitReply,
-  onDeleteTree,
+  onCommentDelete,
+  onSaveCommentEdit,
   busyId,
   userId,
   isAdmin,
@@ -69,6 +74,32 @@ function ThreadNode({
   const children = byParent.get(comment.id) ?? [];
   const isAuthor = comment.authorId === post.authorId;
   const isRoot = depth === 0;
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(comment.content);
+
+  useEffect(() => {
+    if (!editing) {
+      setEditText(comment.content);
+    }
+  }, [comment.content, comment.id, editing]);
+
+  const isCommentAuthor = Boolean(userId && comment.authorId === userId);
+  const canModDelete =
+    Boolean(userId) && (isAdmin || post.authorId === userId);
+  const showCommentEdit = isCommentAuthor;
+  const showCommentDelete = isCommentAuthor || canModDelete;
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    const t = editText.trim();
+    if (!t || busyId === comment.id) return;
+    try {
+      await onSaveCommentEdit(comment, t);
+      setEditing(false);
+    } catch {
+      /* onSaveCommentEdit가 실패 시 에러는 상위에서 표시 */
+    }
+  }
 
   return (
     <div
@@ -96,36 +127,80 @@ function ThreadNode({
           )}
         </div>
         <div className="mt-2 text-sm text-neutral-950">
-          <MarkdownContent markdown={comment.content} className="markdown-content text-sm leading-relaxed" />
+          {editing ? (
+            <form onSubmit={handleSaveEdit} className="space-y-2">
+              <label className="sr-only" htmlFor={`edit-${comment.id}`}>
+                댓글 수정
+              </label>
+              <textarea
+                id={`edit-${comment.id}`}
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                rows={4}
+                disabled={busyId === comment.id}
+                className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-500 disabled:opacity-50"
+              />
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="submit"
+                  disabled={busyId === comment.id || !editText.trim()}
+                  className="rounded-lg bg-emerald-800 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                >
+                  {busyId === comment.id ? "저장 중…" : "저장"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busyId === comment.id}
+                  onClick={() => {
+                    setEditText(comment.content);
+                    setEditing(false);
+                  }}
+                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
+                >
+                  취소
+                </button>
+              </div>
+            </form>
+          ) : (
+            <MarkdownContent
+              markdown={comment.content}
+              className="markdown-content text-sm leading-relaxed"
+            />
+          )}
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-2">
           <p className="text-xs font-medium text-neutral-600">
             {nicknameByUid[comment.authorId] ?? shortUid(comment.authorId)} ·{" "}
             {formatDate(comment.createdAt)}
+            {comment.updatedAt ? (
+              <span className="text-neutral-400"> · 수정됨</span>
+            ) : null}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {canPostComments && userId && (
-              <button
-                type="button"
-                onClick={() =>
-                  setReplyingToId(replyingToId === comment.id ? null : comment.id)
-                }
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
-              >
-                {replyingToId === comment.id ? "답글 취소" : "답글"}
-              </button>
-            )}
-            {isAdmin && (
-              <button
-                type="button"
-                disabled={busyId === comment.id}
-                onClick={() => onDeleteTree(comment.id)}
-                className="rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
-              >
-                {busyId === comment.id ? "삭제 중…" : "삭제"}
-              </button>
-            )}
-          </div>
+          {!editing && (
+            <div className="flex flex-wrap items-center gap-2">
+              {canPostComments && userId && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setReplyingToId(replyingToId === comment.id ? null : comment.id)
+                  }
+                  className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
+                >
+                  {replyingToId === comment.id ? "답글 취소" : "답글"}
+                </button>
+              )}
+              <CommentActionsMenu
+                showEdit={showCommentEdit}
+                showDelete={showCommentDelete}
+                onEdit={() => {
+                  setEditText(comment.content);
+                  setEditing(true);
+                }}
+                onDelete={() => onCommentDelete(comment)}
+                deleting={busyId === comment.id}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -148,7 +223,8 @@ function ThreadNode({
           replyingToId={replyingToId}
           setReplyingToId={setReplyingToId}
           onSubmitReply={onSubmitReply}
-          onDeleteTree={onDeleteTree}
+          onCommentDelete={onCommentDelete}
+          onSaveCommentEdit={onSaveCommentEdit}
           busyId={busyId}
           userId={userId}
           isAdmin={isAdmin}
@@ -273,13 +349,37 @@ export function QnaSection({
     [post.id, refresh, user],
   );
 
-  const handleDeleteTree = useCallback(
-    async (commentId: string) => {
-      if (!confirm("이 글과 연결된 답글까지 모두 삭제할까요?")) return;
-      setBusyId(commentId);
+  const handleCommentDelete = useCallback(
+    async (comment: Comment) => {
+      if (!user) return;
+      const uid = user.uid;
+      const children = byParent.get(comment.id) ?? [];
+      const isAuthor = comment.authorId === uid;
+      const canMod = isAdmin || post.authorId === uid;
+
+      if (isAuthor && !canMod && children.length > 0) {
+        const ids = collectSubtreeIds(comment.id, comments);
+        const allMine = ids.every(
+          (id) => comments.find((c) => c.id === id)?.authorId === uid,
+        );
+        if (!allMine) {
+          alert(
+            "다른 분이 단 답글이 있어 이 스레드는 글 작성자 또는 관리자만 삭제할 수 있습니다.",
+          );
+          return;
+        }
+      }
+
+      const hasReplies = children.length > 0;
+      const msg = hasReplies
+        ? "이 메시지와 연결된 답글까지 모두 삭제할까요?"
+        : "이 메시지를 삭제할까요?";
+      if (!confirm(msg)) return;
+
+      setBusyId(comment.id);
       setRootError(null);
       try {
-        await deleteCommentTree(commentId, post.id);
+        await deleteCommentTree(comment.id, post.id);
         await refresh();
       } catch (e) {
         console.error(e);
@@ -288,7 +388,30 @@ export function QnaSection({
         setBusyId(null);
       }
     },
-    [post.id, refresh],
+    [user, isAdmin, post.authorId, post.id, comments, byParent, refresh],
+  );
+
+  const handleSaveCommentEdit = useCallback(
+    async (c: Comment, content: string) => {
+      if (!user || user.uid !== c.authorId) return;
+      setBusyId(c.id);
+      setRootError(null);
+      try {
+        await updateComment({
+          commentId: c.id,
+          authorId: user.uid,
+          content,
+        });
+        await refresh();
+      } catch (e) {
+        console.error(e);
+        setRootError("수정에 실패했습니다.");
+        throw e;
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [user, refresh],
   );
 
   return (
@@ -325,7 +448,8 @@ export function QnaSection({
               replyingToId={replyingToId}
               setReplyingToId={setReplyingToId}
               onSubmitReply={submitReply}
-              onDeleteTree={handleDeleteTree}
+              onCommentDelete={handleCommentDelete}
+              onSaveCommentEdit={handleSaveCommentEdit}
               busyId={busyId}
               userId={user?.uid}
               isAdmin={isAdmin}

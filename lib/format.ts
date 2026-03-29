@@ -10,12 +10,13 @@ export function formatDate(value: Timestamp | Date | unknown): string {
   } else {
     return "";
   }
-  return d.toLocaleDateString("ko-KR", {
+  return d.toLocaleString("ko-KR", {
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   });
 }
 

@@ -11,6 +11,8 @@ export interface Post {
   region: string;
   authorId: string;
   createdAt: Timestamp | Date;
+  /** 수정 시 갱신 */
+  updatedAt?: Timestamp | Date;
   status: PostStatus;
   commentsEnabled?: boolean;
 }
@@ -21,6 +23,7 @@ export interface Comment {
   content: string;
   authorId: string;
   createdAt: Timestamp | Date;
+  updatedAt?: Timestamp | Date;
   /** null·없음 = 최상위 질문/글 스레드 */
   parentId?: string | null;
 }

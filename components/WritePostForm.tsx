@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createPost } from "@/lib/posts";
+import { createPost, updatePendingPost } from "@/lib/posts";
 import { POST_CATEGORIES, REGIONS } from "@/lib/constants";
 import { useAuth } from "@/providers/AuthProvider";
 import { MarkdownContent } from "@/components/MarkdownContent";
+import type { Post } from "@/lib/types";
 
 type Tab = "edit" | "preview";
 
-export function WritePostForm() {
+type Props = {
+  mode?: "create" | "edit";
+  initialPost?: Post | null;
+};
+
+export function WritePostForm({ mode = "create", initialPost = null }: Props) {
   const { user } = useAuth();
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -21,6 +27,15 @@ export function WritePostForm() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("edit");
 
+  useEffect(() => {
+    if (mode !== "edit" || !initialPost) return;
+    setTitle(initialPost.title);
+    setContent(initialPost.content);
+    setCategory(initialPost.category);
+    setRegion(initialPost.region);
+    setCommentsEnabled(initialPost.commentsEnabled ?? true);
+  }, [mode, initialPost]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
@@ -31,18 +46,36 @@ export function WritePostForm() {
     setSubmitting(true);
     setError(null);
     try {
-      const id = await createPost({
-        title,
-        content,
-        category,
-        region,
-        authorId: user.uid,
-        commentsEnabled,
-      });
-      router.push(`/posts/${id}`);
+      if (mode === "edit" && initialPost) {
+        await updatePendingPost({
+          postId: initialPost.id,
+          title,
+          content,
+          category,
+          region,
+          authorId: user.uid,
+          commentsEnabled,
+        });
+        router.push(`/posts/${initialPost.id}`);
+        router.refresh();
+      } else {
+        const id = await createPost({
+          title,
+          content,
+          category,
+          region,
+          authorId: user.uid,
+          commentsEnabled,
+        });
+        router.push(`/posts/${id}`);
+      }
     } catch (err) {
       console.error(err);
-      setError("저장에 실패했습니다.");
+      setError(
+        mode === "edit"
+          ? "수정 저장에 실패했습니다."
+          : "저장에 실패했습니다.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -178,14 +211,22 @@ export function WritePostForm() {
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <p className="text-xs text-zinc-700">
-        제출 후 관리자 승인이 있으면 홈에 공개됩니다.
+        {mode === "edit"
+          ? "승인 전까지 수정할 수 있습니다. 저장 후에도 관리자 승인이 있어야 홈에 공개됩니다."
+          : "제출 후 관리자 승인이 있으면 홈에 공개됩니다."}
       </p>
       <button
         type="submit"
         disabled={submitting}
         className="w-full rounded-lg bg-zinc-900 py-3 text-sm font-medium text-[#ffffff] disabled:opacity-50"
       >
-        {submitting ? "보내는 중…" : "제출하기"}
+        {submitting
+          ? mode === "edit"
+            ? "저장 중…"
+            : "보내는 중…"
+          : mode === "edit"
+            ? "수정 저장"
+            : "제출하기"}
       </button>
     </form>
   );

@@ -10,7 +10,8 @@ import {
   REGION_ALL,
   REGIONS,
 } from "@/lib/constants";
-import { formatDate } from "@/lib/format";
+import { formatDate, shortUid } from "@/lib/format";
+import { fetchNicknamesByUids } from "@/lib/profile";
 import type { Post } from "@/lib/types";
 
 function resolveCategory(raw: string | null): string {
@@ -54,6 +55,7 @@ export function HomePosts() {
   );
 
   const [posts, setPosts] = useState<Post[]>([]);
+  const [nicknameByUid, setNicknameByUid] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,6 +76,17 @@ export function HomePosts() {
         region,
       });
       setPosts(list);
+      if (list.length > 0) {
+        const uids = [...new Set(list.map((p) => p.authorId).filter(Boolean))];
+        try {
+          const map = await fetchNicknamesByUids(uids);
+          setNicknameByUid(map);
+        } catch {
+          setNicknameByUid({});
+        }
+      } else {
+        setNicknameByUid({});
+      }
     } catch (e) {
       console.error(e);
       if (isIndexBuildingError(e)) {
@@ -84,6 +97,7 @@ export function HomePosts() {
         setError("글을 불러오지 못했습니다. 환경 변수와 Firestore 규칙·인덱스를 확인해 주세요.");
       }
       setPosts([]);
+      setNicknameByUid({});
     } finally {
       setLoading(false);
     }
@@ -173,9 +187,12 @@ export function HomePosts() {
                 <h2 className="text-lg font-semibold leading-snug text-neutral-950">
                   {p.title}
                 </h2>
-                <p className="mt-2 text-xs font-medium text-neutral-600">
-                  {formatDate(p.createdAt)}
-                </p>
+                <div className="mt-2 flex items-baseline justify-between gap-2 text-xs font-medium text-neutral-600">
+                  <span className="min-w-0 shrink">{formatDate(p.createdAt)}</span>
+                  <span className="shrink-0 text-right text-neutral-700">
+                    {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
+                  </span>
+                </div>
               </Link>
             </li>
           ))}

@@ -27,6 +27,7 @@ function mapPost(id: string, data: Record<string, unknown>): Post {
     region: String(data.region ?? "전국"),
     authorId: String(data.authorId ?? ""),
     createdAt: data.createdAt as Post["createdAt"],
+    updatedAt: data.updatedAt as Post["updatedAt"],
     status: (data.status as PostStatus) ?? "pending",
     commentsEnabled:
       typeof data.commentsEnabled === "boolean"
@@ -133,6 +134,39 @@ export async function fetchPostById(id: string): Promise<Post | null> {
   return mapPost(snap.id, snap.data() as Record<string, unknown>);
 }
 
+/** 승인 대기(pending) 글 — 작성자만 수정 가능 (Firestore 규칙과 함께 사용) */
+export async function updatePendingPost(input: {
+  postId: string;
+  title: string;
+  content: string;
+  category: string;
+  region: string;
+  authorId: string;
+  commentsEnabled: boolean;
+}): Promise<void> {
+  const db = getFirebaseDb();
+  const ref = doc(db, POSTS, input.postId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    throw new Error("글을 찾을 수 없습니다.");
+  }
+  const data = snap.data() as Record<string, unknown>;
+  if (String(data.authorId ?? "") !== input.authorId) {
+    throw new Error("이 글을 수정할 권한이 없습니다.");
+  }
+  if ((data.status as PostStatus) !== "pending") {
+    throw new Error("승인 대기 중인 글만 수정할 수 있습니다.");
+  }
+  await updateDoc(ref, {
+    title: input.title.trim(),
+    content: input.content.trim(),
+    category: input.category,
+    region: input.region,
+    commentsEnabled: Boolean(input.commentsEnabled),
+    updatedAt: serverTimestamp(),
+  });
+}
+
 export async function createPost(input: {
   title: string;
   content: string;
@@ -171,5 +205,29 @@ export async function deletePostAsAdmin(postId: string): Promise<void> {
   const batch = writeBatch(db);
   commentsSnap.docs.forEach((d) => batch.delete(d.ref));
   batch.delete(doc(db, POSTS, postId));
+  await batch.commit();
+}
+
+/** 작성자: 글(승인 여부 무관) + 해당 글 댓글 일괄 삭제 */
+export async function deletePostByAuthor(input: {
+  postId: string;
+  authorId: string;
+}): Promise<void> {
+  const db = getFirebaseDb();
+  const ref = doc(db, POSTS, input.postId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    throw new Error("글을 찾을 수 없습니다.");
+  }
+  const data = snap.data() as Record<string, unknown>;
+  if (String(data.authorId ?? "") !== input.authorId) {
+    throw new Error("이 글을 삭제할 권한이 없습니다.");
+  }
+  const commentsSnap = await getDocs(
+    query(collection(db, COMMENTS), where("postId", "==", input.postId)),
+  );
+  const batch = writeBatch(db);
+  commentsSnap.docs.forEach((d) => batch.delete(d.ref));
+  batch.delete(ref);
   await batch.commit();
 }

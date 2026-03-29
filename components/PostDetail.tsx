@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchCommentsForPost } from "@/lib/comments";
 import { fetchPostById } from "@/lib/posts";
 import { formatDate, shortUid } from "@/lib/format";
@@ -9,11 +10,13 @@ import type { Comment, Post } from "@/lib/types";
 import { useAuth } from "@/providers/AuthProvider";
 import { fetchNicknamesByUids } from "@/lib/profile";
 import { MarkdownContent } from "@/components/MarkdownContent";
+import { PostActionsMenu } from "@/components/PostActionsMenu";
 import { QnaSection } from "@/components/QnaSection";
 
 type Props = { postId: string };
 
 export function PostDetail({ postId }: Props) {
+  const router = useRouter();
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [post, setPost] = useState<Post | null>(null);
   const [loadingPost, setLoadingPost] = useState(true);
@@ -117,15 +120,32 @@ export function PostDetail({ postId }: Props) {
         <h1 className="text-2xl font-bold leading-tight tracking-tight text-neutral-950 sm:text-3xl">
           {post.title}
         </h1>
-        <p className="mt-3 text-xs font-medium text-neutral-700">
-          {formatDate(post.createdAt)} · 작성자{" "}
-          {nicknameByUid[post.authorId] ?? shortUid(post.authorId)}
-          {post.status === "pending" && (
-            <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-amber-900">
-              승인 대기
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs font-medium text-neutral-700">
+          <span className="min-w-0 shrink">{formatDate(post.createdAt)}</span>
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 sm:flex-initial">
+            <span className="shrink-0 text-neutral-800">
+              {nicknameByUid[post.authorId] ?? shortUid(post.authorId)}
             </span>
-          )}
-        </p>
+            {post.status === "pending" && (
+              <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
+                승인 대기
+              </span>
+            )}
+            {user && post.authorId === user.uid && (
+              <PostActionsMenu
+                postId={post.id}
+                authorId={post.authorId}
+                showEdit={post.status === "pending"}
+                onDeleted={() => router.push("/")}
+                className={
+                  post.status === "approved"
+                    ? "[&_button]:text-zinc-600 [&_button]:hover:bg-zinc-100"
+                    : undefined
+                }
+              />
+            )}
+          </div>
+        </div>
       </header>
       <div className="rounded-xl border border-zinc-200 bg-white px-4 py-5 shadow-sm">
         <MarkdownContent markdown={post.content} />

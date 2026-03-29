@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
   writeBatch,
 } from "firebase/firestore";
@@ -24,6 +25,7 @@ function mapComment(id: string, data: Record<string, unknown>): Comment {
     content: String(data.content ?? ""),
     authorId: String(data.authorId ?? ""),
     createdAt: data.createdAt as Comment["createdAt"],
+    updatedAt: data.updatedAt as Comment["updatedAt"],
     parentId: typeof data.parentId === "string" ? data.parentId : null,
   };
 }
@@ -67,7 +69,8 @@ export async function addComment(input: {
   return ref.id;
 }
 
-function collectSubtreeIds(
+/** 같은 글 안에서 루트 댓글과 그 하위 답글 id 목록 (삭제·권한 판별용) */
+export function collectSubtreeIds(
   rootId: string,
   comments: Comment[],
 ): string[] {
@@ -106,6 +109,27 @@ export async function deleteCommentTree(
     batch.delete(doc(db, COMMENTS, id));
   }
   await batch.commit();
+}
+
+export async function updateComment(input: {
+  commentId: string;
+  authorId: string;
+  content: string;
+}): Promise<void> {
+  const db = getFirebaseDb();
+  const ref = doc(db, COMMENTS, input.commentId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    throw new Error("댓글을 찾을 수 없습니다.");
+  }
+  const data = snap.data() as Record<string, unknown>;
+  if (String(data.authorId ?? "") !== input.authorId) {
+    throw new Error("이 댓글을 수정할 권한이 없습니다.");
+  }
+  await updateDoc(ref, {
+    content: input.content.trim(),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function deleteComment(commentId: string): Promise<void> {
