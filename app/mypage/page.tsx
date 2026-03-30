@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signOut } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { MyPendingPosts } from "@/components/MyPendingPosts";
+import { MyActivityLists } from "@/components/MyActivityLists";
 import { useAuth } from "@/providers/AuthProvider";
 
 export default function MyPage() {
@@ -84,6 +85,7 @@ export default function MyPage() {
       </div>
 
       <MyPendingPosts authorId={user.uid} />
+      <MyActivityLists userId={user.uid} />
 
       <button
         type="button"

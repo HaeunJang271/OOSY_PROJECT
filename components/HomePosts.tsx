@@ -134,19 +134,35 @@ export function HomePosts() {
             >
               주제
             </label>
-            <select
-              id="home-filter-category"
-              value={category}
-              onChange={(e) => navigateWith({ category: e.target.value })}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
-            >
-              <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
-              {POST_CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="home-filter-category"
+                value={category}
+                onChange={(e) => navigateWith({ category: e.target.value })}
+                className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 pr-10 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
+              >
+                <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
+                {POST_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-500">
+                <svg
+                  aria-hidden
+                  viewBox="0 0 20 20"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 7.5L10 12.5L15 7.5" />
+                </svg>
+              </span>
+            </div>
           </div>
           <div>
             <label
@@ -155,18 +171,34 @@ export function HomePosts() {
             >
               지역
             </label>
-            <select
-              id="home-filter-region"
-              value={region}
-              onChange={(e) => navigateWith({ region: e.target.value })}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
-            >
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="home-filter-region"
+                value={region}
+                onChange={(e) => navigateWith({ region: e.target.value })}
+                className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 pr-10 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
+              >
+                {REGIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-500">
+                <svg
+                  aria-hidden
+                  viewBox="0 0 20 20"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 7.5L10 12.5L15 7.5" />
+                </svg>
+              </span>
+            </div>
           </div>
         </div>
       </section>

@@ -136,3 +136,33 @@ export async function deleteComment(commentId: string): Promise<void> {
   const db = getFirebaseDb();
   await deleteDoc(doc(db, COMMENTS, commentId));
 }
+
+/** 내가 남긴 최상위 질문(parentId == null)의 글 ID 목록 */
+export async function fetchMyQuestionPostIds(authorId: string): Promise<string[]> {
+  const db = getFirebaseDb();
+  const q = query(
+    collection(db, COMMENTS),
+    where("authorId", "==", authorId),
+    where("parentId", "==", null),
+  );
+  const snap = await getDocs(q);
+  return [...new Set(
+    snap.docs
+      .map((d) => String((d.data() as { postId?: string }).postId ?? ""))
+      .filter(Boolean),
+  )];
+}
+
+/** 내가 남긴 최상위 질문(parentId == null) 목록 */
+export async function fetchMyRootQuestions(authorId: string): Promise<Comment[]> {
+  const db = getFirebaseDb();
+  const q = query(
+    collection(db, COMMENTS),
+    where("authorId", "==", authorId),
+    where("parentId", "==", null),
+  );
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => mapComment(d.id, d.data()))
+    .sort((a, b) => timestampMs(b.createdAt) - timestampMs(a.createdAt));
+}

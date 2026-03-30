@@ -15,6 +15,7 @@ import {
 import type { Post, PostStatus } from "@/lib/types";
 import { CATEGORY_ALL, REGION_ALL, REGIONS } from "@/lib/constants";
 import { getFirebaseDb } from "@/lib/firebase";
+import { timestampMs } from "@/lib/format";
 
 const POSTS = "posts";
 
@@ -130,6 +131,37 @@ export async function fetchMyPendingPosts(authorId: string): Promise<Post[]> {
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => mapPost(d.id, d.data()));
+}
+
+/** 내가 작성한 글 전체 (승인/대기 포함) */
+export async function fetchMyPosts(authorId: string): Promise<Post[]> {
+  const db = getFirebaseDb();
+  const q = query(
+    collection(db, POSTS),
+    where("authorId", "==", authorId),
+    limit(200),
+  );
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => mapPost(d.id, d.data()))
+    .sort((a, b) => timestampMs(b.createdAt) - timestampMs(a.createdAt));
+}
+
+/** 여러 글 ID를 한 번에 조회 (읽기 권한 없는 문서는 제외될 수 있음) */
+export async function fetchPostsByIds(postIds: string[]): Promise<Post[]> {
+  if (postIds.length === 0) return [];
+  const db = getFirebaseDb();
+  const uniq = [...new Set(postIds)];
+  const docs = await Promise.all(
+    uniq.map((id) => getDoc(doc(db, POSTS, id))),
+  );
+  const list: Post[] = [];
+  for (const d of docs) {
+    if (d.exists()) {
+      list.push(mapPost(d.id, d.data() as Record<string, unknown>));
+    }
+  }
+  return list.sort((a, b) => timestampMs(b.createdAt) - timestampMs(a.createdAt));
 }
 
 export async function fetchPostById(id: string): Promise<Post | null> {

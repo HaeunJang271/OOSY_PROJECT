@@ -284,7 +284,6 @@ function ReplyBox({
         onChange={(e) => setText(e.target.value)}
         rows={3}
         className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-500"
-        placeholder="짧게 답해 주세요."
       />
       <div className="mt-2 flex flex-wrap gap-2">
         <button
@@ -421,14 +420,9 @@ export function QnaSection({
           <h2 className="text-base font-semibold text-neutral-950">
             Q&A 스레드
           </h2>
-          <p className="text-xs text-neutral-600">
-            {post.status !== "approved"
-              ? "글 공개 승인 후에 질문·답글을 남길 수 있어요."
-              : "질문은 맨 위에, 답글은 아래로 이어집니다. 답글에 또 답글을 달 수 있어요."}
-          </p>
         </div>
         <p className="text-xs font-medium text-neutral-500">
-          {comments.length}개 메시지
+          댓글 {comments.length}
         </p>
       </div>
 
@@ -481,9 +475,6 @@ export function QnaSection({
               submitLabel="질문 등록"
               showCancel={false}
             />
-            <p className="mt-2 text-xs text-neutral-500">
-              특정 답글에 이어 달려면 위 스레드에서 해당 메시지의 「답글」을 눌러 주세요.
-            </p>
           </div>
         ) : (
           <p className="mt-6 text-sm text-zinc-800">
