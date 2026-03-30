@@ -95,6 +95,35 @@ service cloud.firestore {
       );
     }
 
+    match /postReports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.reportType in [
+          '스팸/홍보',
+          '욕설/비방',
+          '음란/선정적',
+          '허위 정보',
+          '기타'
+        ]
+        && request.resource.data.status == 'open'
+        && request.resource.data.keys().hasAll([
+          'postId', 'reporterId', 'reportType', 'status', 'createdAt'
+        ])
+        && reportId == (request.resource.data.postId + '_' + request.auth.uid)
+        && canReadPostId(request.resource.data.postId);
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.reporterId == request.auth.uid);
+      allow update: if isAdmin()
+        && request.resource.data.postId == resource.data.postId
+        && request.resource.data.reporterId == resource.data.reporterId
+        && request.resource.data.reportType == resource.data.reportType
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'resolvedAt', 'resolvedBy'
+        ]);
+      allow delete: if isAdmin();
+    }
+
     match /admins/{uid} {
       allow read: if signedIn()
         && (request.auth.uid == uid || isAdmin());

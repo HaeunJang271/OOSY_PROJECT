@@ -12,6 +12,9 @@ import {
 } from "@/lib/constants";
 import { formatDate, shortUid } from "@/lib/format";
 import { fetchNicknamesByUids } from "@/lib/profile";
+import { PostActionsMenu } from "@/components/PostActionsMenu";
+import { useAuth } from "@/providers/AuthProvider";
+import { fetchMyReportedPostIds } from "@/lib/reports";
 import type { Post } from "@/lib/types";
 
 function resolveCategory(raw: string | null): string {
@@ -49,6 +52,7 @@ function buildHomePath(parts: { category: string; region: string }): string {
 
 export function HomePosts() {
   const router = useRouter();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const category = useMemo(
     () => resolveCategory(searchParams.get("category")),
@@ -80,9 +84,13 @@ export function HomePosts() {
         category,
         region,
       });
-      setPosts(list);
-      if (list.length > 0) {
-        const uids = [...new Set(list.map((p) => p.authorId).filter(Boolean))];
+      const hiddenIds = user?.uid
+        ? await fetchMyReportedPostIds(user.uid)
+        : new Set<string>();
+      const visible = list.filter((p) => !hiddenIds.has(p.id));
+      setPosts(visible);
+      if (visible.length > 0) {
+        const uids = [...new Set(visible.map((p) => p.authorId).filter(Boolean))];
         try {
           const map = await fetchNicknamesByUids(uids);
           setNicknameByUid(map);
@@ -106,7 +114,7 @@ export function HomePosts() {
     } finally {
       setLoading(false);
     }
-  }, [category, region]);
+  }, [category, region, user?.uid]);
 
   useEffect(() => {
     load();
@@ -176,11 +184,8 @@ export function HomePosts() {
         <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
           {posts.map((p) => (
             <li key={p.id} className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4">
-              <Link
-                href={`/posts/${p.id}`}
-                className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
-              >
-                <div className="mb-1.5 flex flex-wrap gap-1.5">
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
                     {p.category}
                   </span>
@@ -188,6 +193,22 @@ export function HomePosts() {
                     {p.region}
                   </span>
                 </div>
+                <PostActionsMenu
+                  postId={p.id}
+                  authorId={p.authorId}
+                  showEdit={false}
+                  canDelete={Boolean(user?.uid === p.authorId)}
+                  showReport
+                  reporterId={user?.uid}
+                  onDeleted={() => void load()}
+                  onReported={() => void load()}
+                  triggerClassName="h-5 w-5 text-zinc-600 hover:bg-zinc-100"
+                />
+              </div>
+              <Link
+                href={`/posts/${p.id}`}
+                className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
+              >
                 <h2 className="text-lg font-semibold leading-snug text-neutral-950">
                   {p.title}
                 </h2>

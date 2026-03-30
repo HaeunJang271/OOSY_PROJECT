@@ -8,18 +8,24 @@ import {
   fetchPendingPosts,
   setPostStatus,
 } from "@/lib/posts";
+import {
+  fetchPostReports,
+  resolvePostReport,
+  type PostReport,
+} from "@/lib/reports";
 import { formatDate, shortUid } from "@/lib/format";
 import type { Post } from "@/lib/types";
 import { useAuth } from "@/providers/AuthProvider";
 import { fetchNicknamesByUids } from "@/lib/profile";
 
-type Tab = "pending" | "approved";
+type Tab = "pending" | "approved" | "reports";
 
 export function AdminDashboard() {
   const { user, isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<Tab>("pending");
   const [pending, setPending] = useState<Post[]>([]);
   const [approved, setApproved] = useState<Post[]>([]);
+  const [reports, setReports] = useState<PostReport[]>([]);
   const [nicknameByUid, setNicknameByUid] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,12 +65,31 @@ export function AdminDashboard() {
     }
   }, [isAdmin, loadNicknames]);
 
+  const loadReports = useCallback(async () => {
+    if (!isAdmin) return;
+    setError(null);
+    try {
+      const list = await fetchPostReports(100);
+      setReports(list.filter((r) => r.status === "open"));
+      try {
+        const map = await fetchNicknamesByUids(list.map((r) => r.reporterId));
+        setNicknameByUid((prev) => ({ ...prev, ...map }));
+      } catch {
+        // 신고자 닉네임 조회 실패 시 UID fallback
+      }
+    } catch (e) {
+      console.error(e);
+      setError("신고 목록을 불러오지 못했습니다.");
+    }
+  }, [isAdmin]);
+
   useEffect(() => {
     if (!loading && isAdmin) {
       void loadPending();
       void loadApproved();
+      void loadReports();
     }
-  }, [loading, isAdmin, loadPending, loadApproved]);
+  }, [loading, isAdmin, loadPending, loadApproved, loadReports]);
 
   async function approve(id: string) {
     setBusy(true);
@@ -89,9 +114,26 @@ export function AdminDashboard() {
       await deletePostAsAdmin(id);
       setPending((prev) => prev.filter((p) => p.id !== id));
       setApproved((prev) => prev.filter((p) => p.id !== id));
+      // 신고 관리 탭에서도 즉시 반영되도록, 해당 글 신고 카드를 함께 제거
+      setReports((prev) => prev.filter((r) => r.postId !== id));
     } catch (e) {
       console.error(e);
       setError("삭제에 실패했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resolveReport(reportId: string) {
+    if (!user) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await resolvePostReport({ reportId, resolverId: user.uid });
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
+    } catch (e) {
+      console.error(e);
+      setError("신고 처리에 실패했습니다.");
     } finally {
       setBusy(false);
     }
@@ -145,6 +187,17 @@ export function AdminDashboard() {
           }`}
         >
           공개 글 관리
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("reports")}
+          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+            tab === "reports"
+              ? "bg-white text-zinc-950 shadow-sm"
+              : "text-zinc-800"
+          }`}
+        >
+          신고 관리 ({reports.length})
         </button>
       </div>
 
@@ -264,6 +317,71 @@ export function AdminDashboard() {
                       className="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50 sm:w-auto"
                     >
                       삭제
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {tab === "reports" && (
+        <section className="space-y-3">
+          <p className="text-sm text-zinc-800">
+            사용자 신고 내역입니다. 확인 후 처리 완료를 누르거나, 필요 시 글을 삭제하세요.
+          </p>
+          {reports.length === 0 && !error && (
+            <p className="text-sm text-zinc-700">처리할 신고가 없습니다.</p>
+          )}
+          <ul className="space-y-3">
+            {reports.map((r) => (
+              <li
+                key={r.id}
+                className="cursor-pointer rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
+                onClick={() => {
+                  window.location.href = `/posts/${r.postId}?fromReport=1`;
+                }}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-900">
+                        신고 접수
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        postId: {r.postId}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-600">
+                      신고자: {nicknameByUid[r.reporterId] ?? shortUid(r.reporterId)}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      신고 유형: {r.reportType}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-2 sm:pl-4">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void resolveReport(r.id);
+                      }}
+                      className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 disabled:opacity-50"
+                    >
+                      처리 완료
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void removePost(r.postId);
+                      }}
+                      className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
+                    >
+                      글 삭제
                     </button>
                   </div>
                 </div>
