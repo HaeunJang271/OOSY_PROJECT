@@ -119,11 +119,11 @@ export function MyActivityLists({ userId }: Props) {
 
   return (
     <section className="mt-8 border-t border-zinc-200 pt-6">
-      <div className="mb-4 flex flex-wrap gap-2 rounded-xl border border-zinc-300 bg-zinc-100/80 p-1">
+      <div className="mb-4 grid grid-cols-2 gap-2 rounded-xl border border-zinc-300 bg-zinc-100/80 p-1 sm:grid-cols-4">
         <button
           type="button"
           onClick={() => setTab("posts")}
-          className={`min-w-24 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+          className={`rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "posts" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-800"
           }`}
         >
@@ -132,7 +132,7 @@ export function MyActivityLists({ userId }: Props) {
         <button
           type="button"
           onClick={() => setTab("questions")}
-          className={`min-w-24 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+          className={`rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "questions" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-800"
           }`}
         >
@@ -141,7 +141,7 @@ export function MyActivityLists({ userId }: Props) {
         <button
           type="button"
           onClick={() => setTab("bookmarks")}
-          className={`min-w-24 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+          className={`rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "bookmarks" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-800"
           }`}
         >
@@ -150,7 +150,7 @@ export function MyActivityLists({ userId }: Props) {
         <button
           type="button"
           onClick={() => setTab("likes")}
-          className={`min-w-24 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+          className={`rounded-lg px-3 py-2 text-sm font-medium ${
             tab === "likes" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-800"
           }`}
         >
