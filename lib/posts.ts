@@ -13,7 +13,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import type { Post, PostStatus } from "@/lib/types";
-import { CATEGORY_ALL, REGION_ALL } from "@/lib/constants";
+import { CATEGORY_ALL, REGION_ALL, REGIONS } from "@/lib/constants";
 import { getFirebaseDb } from "@/lib/firebase";
 
 const POSTS = "posts";
@@ -54,8 +54,14 @@ export async function fetchApprovedPosts(
     filters.category && filters.category !== CATEGORY_ALL
       ? filters.category
       : undefined;
+  // 홈의 지역 필터는 "전국"을 전체 보기로 취급합니다.
+  const REGION_HOME_ALL = REGIONS[0];
   const region =
-    filters.region && filters.region !== REGION_ALL ? filters.region : undefined;
+    filters.region &&
+    filters.region !== REGION_ALL &&
+    filters.region !== REGION_HOME_ALL
+      ? filters.region
+      : undefined;
 
   const onlyCategory = Boolean(category) && !region;
 

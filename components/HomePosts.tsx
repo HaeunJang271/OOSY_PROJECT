@@ -21,9 +21,13 @@ function resolveCategory(raw: string | null): string {
 }
 
 function resolveRegion(raw: string | null): string {
-  if (!raw || raw === REGION_ALL) return REGION_ALL;
+  // 홈에서는 지역 필터를 "전체(=전국)" 하나만 남기기로 했습니다.
+  // URL에 `전체`가 들어와도 `전국`으로 매핑합니다.
+  const REGION_HOME_ALL = REGIONS[0];
+  if (!raw) return REGION_HOME_ALL;
+  if (raw === REGION_ALL) return REGION_HOME_ALL;
   if ((REGIONS as readonly string[]).includes(raw)) return raw;
-  return REGION_ALL;
+  return REGION_HOME_ALL;
 }
 
 function isIndexBuildingError(e: unknown): boolean {
@@ -37,7 +41,8 @@ function isIndexBuildingError(e: unknown): boolean {
 function buildHomePath(parts: { category: string; region: string }): string {
   const params = new URLSearchParams();
   if (parts.category !== CATEGORY_ALL) params.set("category", parts.category);
-  if (parts.region !== REGION_ALL) params.set("region", parts.region);
+  const REGION_HOME_ALL = REGIONS[0];
+  if (parts.region !== REGION_HOME_ALL) params.set("region", parts.region);
   const q = params.toString();
   return q ? `/?${q}` : "/";
 }
@@ -148,7 +153,6 @@ export function HomePosts() {
               onChange={(e) => navigateWith({ region: e.target.value })}
               className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
             >
-              <option value={REGION_ALL}>{REGION_ALL}</option>
               {REGIONS.map((r) => (
                 <option key={r} value={r}>
                   {r}
@@ -165,7 +169,7 @@ export function HomePosts() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {!loading && !error && posts.length === 0 && (
-        <p className="text-sm text-neutral-800">아직 승인된 글이 없습니다.</p>
+        <p className="text-sm text-neutral-800">첫 번째 글을 작성해 주세요!</p>
       )}
 
       {posts.length > 0 && (
