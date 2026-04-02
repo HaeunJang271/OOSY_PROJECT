@@ -3,30 +3,19 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
-import { fetchMyPoints } from "@/lib/points";
+import { ensureMyPoints, listenMyPoints } from "@/lib/points";
 
 export function Header() {
   const { user, loading } = useAuth();
   const [points, setPoints] = useState<number>(0);
 
   useEffect(() => {
-    let alive = true;
-    async function run() {
-      if (!user) {
-        setPoints(0);
-        return;
-      }
-      try {
-        const p = await fetchMyPoints(user.uid);
-        if (alive) setPoints(p);
-      } catch {
-        if (alive) setPoints(0);
-      }
+    if (!user) {
+      setPoints(0);
+      return;
     }
-    void run();
-    return () => {
-      alive = false;
-    };
+    void ensureMyPoints(user.uid);
+    return listenMyPoints(user.uid, setPoints);
   }, [user?.uid]);
 
   return (

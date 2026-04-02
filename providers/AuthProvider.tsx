@@ -17,6 +17,7 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb } from "@/lib/firebase";
 import { fetchUserProfile } from "@/lib/profile";
+import { ensureMyPoints } from "@/lib/points";
 
 type AuthState = {
   user: User | null;
@@ -44,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [nickname, setNickname] = useState<string | null>(null);
   const [needsNickname, setNeedsNickname] = useState(false);
+  const [loginRewardOpen, setLoginRewardOpen] = useState(false);
 
   async function reloadProfile() {
     if (!user) {
@@ -85,6 +87,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           setIsAdmin(false);
         }
+        // points가 없으면 기본값(10P) 세팅
+        try {
+          const didInit = await ensureMyPoints(u.uid);
+          if (didInit) {
+            setLoginRewardOpen(true);
+            window.setTimeout(() => setLoginRewardOpen(false), 2500);
+          }
+        } catch {
+          // ignore
+        }
         try {
           const profile = await fetchUserProfile(u.uid);
           const n = profile?.nickname?.trim() ? profile.nickname : null;
@@ -117,6 +129,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{ user, loading, isAdmin, nickname, needsNickname, reloadProfile }}
     >
       {children}
+      {loginRewardOpen && (
+        <div className="fixed inset-x-0 top-14 z-50 mx-auto w-full max-w-2xl px-4">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 shadow-sm">
+            <p className="font-semibold">로그인 보상 10P</p>
+            <button
+              type="button"
+              onClick={() => setLoginRewardOpen(false)}
+              className="rounded-md border border-emerald-200 bg-white px-2 py-1 text-xs font-medium text-emerald-900 hover:bg-emerald-50"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 }

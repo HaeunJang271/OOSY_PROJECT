@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
-import { fetchMyPoints } from "@/lib/points";
+import { ensureMyPoints, listenMyPoints } from "@/lib/points";
 
 export default function PointsPage() {
   const { user, loading } = useAuth();
@@ -38,20 +38,9 @@ export default function PointsPage() {
   const uid = user.uid;
 
   useEffect(() => {
-    let alive = true;
-    async function run() {
-      setPointsLoading(true);
-      try {
-        const p = await fetchMyPoints(uid);
-        if (alive) setPoints(p);
-      } finally {
-        if (alive) setPointsLoading(false);
-      }
-    }
-    void run();
-    return () => {
-      alive = false;
-    };
+    setPointsLoading(true);
+    void ensureMyPoints(uid).finally(() => setPointsLoading(false));
+    return listenMyPoints(uid, setPoints);
   }, [uid]);
 
   return (
