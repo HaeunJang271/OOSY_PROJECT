@@ -94,6 +94,16 @@ export async function fetchApprovedPosts(
   return list;
 }
 
+/** 승인 글 목록에서 제목·본문 부분 일치 검색 (클라이언트 필터, 최근 승인 글 범위 내) */
+export function filterPostsBySearchQuery(posts: Post[], rawQuery: string): Post[] {
+  const t = rawQuery.trim().toLowerCase();
+  if (!t) return [];
+  return posts.filter(
+    (p) =>
+      p.title.toLowerCase().includes(t) || p.content.toLowerCase().includes(t),
+  );
+}
+
 export async function fetchPendingPosts(): Promise<Post[]> {
   const db = getFirebaseDb();
   const q = query(
