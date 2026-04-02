@@ -148,6 +148,37 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
 
+    match /rewardRequests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'open'
+        && request.resource.data.costPoints is int
+        && request.resource.data.costPoints > 0
+        && request.resource.data.rewardKey in [
+          'chupa',
+          'gift_1000',
+          'gift_2000',
+          'gift_5000',
+          'gift_10000'
+        ]
+        && request.resource.data.rewardName is string
+        && request.resource.data.rewardName.size() > 0
+        && request.resource.data.keys().hasAll([
+          'userId', 'rewardKey', 'rewardName', 'costPoints', 'status', 'createdAt'
+        ]);
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.rewardKey == resource.data.rewardKey
+        && request.resource.data.rewardName == resource.data.rewardName
+        && request.resource.data.costPoints == resource.data.costPoints
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'fulfilledAt', 'fulfilledBy'
+        ]);
+      allow delete: if isAdmin();
+    }
+
     match /admins/{uid} {
       allow read: if signedIn()
         && (request.auth.uid == uid || isAdmin());

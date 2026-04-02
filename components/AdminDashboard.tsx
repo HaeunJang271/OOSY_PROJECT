@@ -13,12 +13,17 @@ import {
   resolvePostReport,
   type PostReport,
 } from "@/lib/reports";
+import {
+  fetchOpenRewardRequests,
+  fulfillRewardRequest,
+  type RewardRequest,
+} from "@/lib/rewardRequests";
 import { formatDate, shortUid } from "@/lib/format";
 import type { Post } from "@/lib/types";
 import { useAuth } from "@/providers/AuthProvider";
 import { fetchNicknamesByUids } from "@/lib/profile";
 
-type Tab = "pending" | "approved" | "reports";
+type Tab = "pending" | "approved" | "reports" | "rewards";
 
 export function AdminDashboard() {
   const { user, isAdmin, loading } = useAuth();
@@ -26,6 +31,7 @@ export function AdminDashboard() {
   const [pending, setPending] = useState<Post[]>([]);
   const [approved, setApproved] = useState<Post[]>([]);
   const [reports, setReports] = useState<PostReport[]>([]);
+  const [rewardRequests, setRewardRequests] = useState<RewardRequest[]>([]);
   const [nicknameByUid, setNicknameByUid] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,13 +89,32 @@ export function AdminDashboard() {
     }
   }, [isAdmin]);
 
+  const loadRewardRequests = useCallback(async () => {
+    if (!isAdmin) return;
+    setError(null);
+    try {
+      const list = await fetchOpenRewardRequests(200);
+      setRewardRequests(list);
+      try {
+        const map = await fetchNicknamesByUids(list.map((r) => r.userId));
+        setNicknameByUid((prev) => ({ ...prev, ...map }));
+      } catch {
+        // ignore
+      }
+    } catch (e) {
+      console.error(e);
+      setError("보상 신청 목록을 불러오지 못했습니다.");
+    }
+  }, [isAdmin]);
+
   useEffect(() => {
     if (!loading && isAdmin) {
       void loadPending();
       void loadApproved();
       void loadReports();
+      void loadRewardRequests();
     }
-  }, [loading, isAdmin, loadPending, loadApproved, loadReports]);
+  }, [loading, isAdmin, loadPending, loadApproved, loadReports, loadRewardRequests]);
 
   async function approve(id: string) {
     setBusy(true);
@@ -134,6 +159,21 @@ export function AdminDashboard() {
     } catch (e) {
       console.error(e);
       setError("신고 처리에 실패했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function fulfillReward(id: string) {
+    if (!user) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await fulfillRewardRequest({ requestId: id, adminId: user.uid });
+      setRewardRequests((prev) => prev.filter((r) => r.id !== id));
+    } catch (e) {
+      console.error(e);
+      setError("보상 처리에 실패했습니다.");
     } finally {
       setBusy(false);
     }
@@ -198,6 +238,17 @@ export function AdminDashboard() {
           }`}
         >
           신고 관리 ({reports.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("rewards")}
+          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+            tab === "rewards"
+              ? "bg-white text-zinc-950 shadow-sm"
+              : "text-zinc-800"
+          }`}
+        >
+          보상 신청 ({rewardRequests.length})
         </button>
       </div>
 
@@ -382,6 +433,54 @@ export function AdminDashboard() {
                       className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
                     >
                       글 삭제
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {tab === "rewards" && (
+        <section className="space-y-3">
+          <p className="text-sm text-zinc-800">
+            포인트 보상 신청 내역입니다. 확인 후 처리 완료를 눌러 주세요.
+          </p>
+          {rewardRequests.length === 0 && !error && (
+            <p className="text-sm text-zinc-700">처리할 신청이 없습니다.</p>
+          )}
+          <ul className="space-y-3">
+            {rewardRequests.map((r) => (
+              <li
+                key={r.id}
+                className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-900">
+                        보상 신청
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        {r.rewardName} · {r.costPoints}P
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-600">
+                      신청자: {nicknameByUid[r.userId] ?? shortUid(r.userId)}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      신청일: {formatDate(r.createdAt)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-2 sm:pl-4">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void fulfillReward(r.id)}
+                      className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 disabled:opacity-50"
+                    >
+                      처리 완료
                     </button>
                   </div>
                 </div>
