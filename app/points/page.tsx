@@ -9,6 +9,18 @@ export default function PointsPage() {
   const { user, loading } = useAuth();
   const [points, setPoints] = useState<number>(0);
   const [pointsLoading, setPointsLoading] = useState(false);
+  const uid = user?.uid ?? null;
+
+  useEffect(() => {
+    if (!uid) {
+      setPoints(0);
+      setPointsLoading(false);
+      return;
+    }
+    setPointsLoading(true);
+    void ensureMyPoints(uid).finally(() => setPointsLoading(false));
+    return listenMyPoints(uid, setPoints);
+  }, [uid]);
 
   if (loading) {
     return (
@@ -34,14 +46,6 @@ export default function PointsPage() {
       </div>
     );
   }
-
-  const uid = user.uid;
-
-  useEffect(() => {
-    setPointsLoading(true);
-    void ensureMyPoints(uid).finally(() => setPointsLoading(false));
-    return listenMyPoints(uid, setPoints);
-  }, [uid]);
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
