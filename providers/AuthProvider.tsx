@@ -18,6 +18,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb } from "@/lib/firebase";
 import { fetchUserProfile } from "@/lib/profile";
 import { ensureMyPoints } from "@/lib/points";
+import { logDailyVisit } from "@/lib/analyticsDaily";
 
 type AuthState = {
   user: User | null;
@@ -94,6 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoginRewardOpen(true);
             window.setTimeout(() => setLoginRewardOpen(false), 2500);
           }
+        } catch {
+          // ignore
+        }
+        // 일일 방문(사용) 1회 카운트
+        try {
+          await logDailyVisit(u.uid);
         } catch {
           // ignore
         }

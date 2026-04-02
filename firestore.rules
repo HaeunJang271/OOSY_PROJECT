@@ -192,7 +192,7 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read: if signedIn() && request.auth.uid == uid;
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.keys().hasAny(['nickname', 'points'])
@@ -221,6 +221,22 @@ service cloud.firestore {
           !('nickname' in request.resource.data)
           || validNickname(request.resource.data.nickname)
         );
+      allow delete: if false;
+    }
+
+    match /analyticsDaily/{docId} {
+      // 집계 문서(YYYY-MM-DD)는 관리자만 읽기
+      allow read: if isAdmin();
+      // 일일 방문수 집계 문서 생성/업데이트는 로그인 사용자 허용(정확한 +1 검증은 dedupe 문서로 보강)
+      allow create: if signedIn();
+      allow update: if signedIn();
+      allow delete: if false;
+    }
+
+    match /analyticsTotals/{docId} {
+      allow read: if isAdmin();
+      allow create: if signedIn();
+      allow update: if signedIn();
       allow delete: if false;
     }
 

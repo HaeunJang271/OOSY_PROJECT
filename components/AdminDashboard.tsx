@@ -18,6 +18,7 @@ import {
   fulfillRewardRequest,
   type RewardRequest,
 } from "@/lib/rewardRequests";
+import { fetchAdminStats, type AdminStats } from "@/lib/adminStats";
 import { formatDate, shortUid } from "@/lib/format";
 import type { Post } from "@/lib/types";
 import { useAuth } from "@/providers/AuthProvider";
@@ -32,6 +33,7 @@ export function AdminDashboard() {
   const [approved, setApproved] = useState<Post[]>([]);
   const [reports, setReports] = useState<PostReport[]>([]);
   const [rewardRequests, setRewardRequests] = useState<RewardRequest[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [nicknameByUid, setNicknameByUid] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,14 +109,26 @@ export function AdminDashboard() {
     }
   }, [isAdmin]);
 
+  const loadStats = useCallback(async () => {
+    if (!isAdmin) return;
+    try {
+      const s = await fetchAdminStats();
+      setStats(s);
+    } catch (e) {
+      console.error(e);
+      setStats(null);
+    }
+  }, [isAdmin]);
+
   useEffect(() => {
     if (!loading && isAdmin) {
       void loadPending();
       void loadApproved();
       void loadReports();
       void loadRewardRequests();
+      void loadStats();
     }
-  }, [loading, isAdmin, loadPending, loadApproved, loadReports, loadRewardRequests]);
+  }, [loading, isAdmin, loadPending, loadApproved, loadReports, loadRewardRequests, loadStats]);
 
   async function approve(id: string) {
     setBusy(true);
@@ -492,6 +506,61 @@ export function AdminDashboard() {
           </ul>
         </section>
       )}
+
+      <section className="mt-10 border-t border-zinc-200 pt-6">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-base font-semibold text-neutral-950">통계</h2>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void loadStats()}
+            className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50"
+          >
+            새로고침
+          </button>
+        </div>
+        {!stats ? (
+          <p className="text-sm text-zinc-700">통계를 불러오지 못했습니다.</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-neutral-500">가입자 수</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.userCount}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-neutral-500">게시글 수</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.postCount}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-neutral-500">질문 수</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.questionCount}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-neutral-500">오늘 방문(사용) 수</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.todayVisits}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-neutral-500">일일 평균 방문(최근 30일)</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.avgDailyVisits30d}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-neutral-500">총 방문(누적)</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.totalVisits}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:col-span-2">
+              <p className="text-xs font-medium text-neutral-500">카테고리별 게시글 수</p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {Object.entries(stats.categoryCounts).map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+                    <span className="text-sm font-medium text-zinc-900">{k}</span>
+                    <span className="text-sm font-semibold text-zinc-900">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
