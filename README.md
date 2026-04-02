@@ -1,6 +1,6 @@
 # OOSY MVP
 
-학교 밖 청소년을 위한 **짧은 강좌·정보 글**과 **댓글** 커뮤니티입니다.  
+학교 밖 청소년을 위한 **짧은 강좌·정보 글**과 **Q&A 스레드 댓글** 커뮤니티입니다.  
 Next.js(App Router), Tailwind CSS, Firebase(Auth + Firestore)로 구성했습니다.
 
 ## 로컬 실행
@@ -13,7 +13,7 @@ Next.js(App Router), Tailwind CSS, Firebase(Auth + Firestore)로 구성했습니
 - **Authentication**: 아래 **카카오 + Firebase 로그인 설정** 참고 (OIDC)
 - **Firestore**: `firestore.rules`와 `firestore.indexes.json` 배포  
   (`firebase init` 후 `firebase deploy --only firestore` 또는 콘솔에서 규칙·인덱스 수동 반영)
-- **관리자**: Firestore에 `admins` 컬렉션을 만들고, 문서 ID를 관리자 계정의 **UID**로 한 빈 문서를 추가합니다. `/admin`에서 **승인 대기** 승인·거부(삭제), **공개 글** 삭제(댓글 포함)가 가능합니다. 규칙 배포 후에만 동작합니다.
+- **관리자**: Firestore에 `admins` 컬렉션을 만들고, 문서 ID를 관리자 계정의 **UID**로 한 빈 문서를 추가합니다. `/admin`에서 **승인 대기** 승인·거부(삭제), **공개 글** 삭제(댓글 포함), **신고 관리**(처리/글 삭제)가 가능합니다. 규칙 배포 후에만 동작합니다.
 
 ## 카카오 + Firebase 로그인 설정
 
@@ -54,8 +54,27 @@ Next.js(App Router), Tailwind CSS, Firebase(Auth + Firestore)로 구성했습니
 ## 데이터 모델
 
 - `posts`: `title`, `content`(마크다운), `category`, `region`, `authorId`, `createdAt`, `status` (`pending` 또는 `approved`), `commentsEnabled`
-- `comments`: `postId`, `content`(마크다운), `authorId`, `createdAt`, `parentId` (최상위 스레드는 `null`)
+- `comments`: `postId`, `content`(마크다운), `authorId`, `createdAt`, `updatedAt`, `parentId` (최상위 스레드는 `null`)
+- `postReports`: `postId`, `reporterId`, `reportType` (`스팸/홍보` 등), `status` (`open`/`resolved`), `createdAt`, `resolvedAt`, `resolvedBy`
+- `postLikes`: `postId`, `userId`, `createdAt` (문서 ID: `${postId}_${userId}`)
+- `postBookmarks`: `postId`, `userId`, `createdAt` (문서 ID: `${postId}_${userId}`)
 
 신규 글은 항상 `pending`이며, 관리자만 `status`를 `approved`로 바꿀 수 있습니다(보안 규칙 반영).  
 **승인된 글**에만 새 댓글이 달리도록 `firestore.rules`에서 제한합니다(`postAllowsNewComments`).  
 마이페이지의 「승인 대기」 목록 등은 `authorId` + `status` + `createdAt` 복합 인덱스가 필요합니다(`firestore.indexes.json` 배포).
+
+## 현재 주요 기능
+
+- 홈: 카테고리/지역 필터, 본인 글 점 메뉴(삭제), 모든 승인 글 점 메뉴(신고)
+- 글 상세:
+  - 본문 + Q&A 스레드(질문/답글)
+  - 댓글 수정/삭제(권한 기반)
+  - 좋아요/북마크(실제 Firestore 연동)
+  - 신고 접수(신고 유형 선택)
+- 신고:
+  - 사용자가 신고하면 본인 목록/상세에서 해당 글 숨김
+  - 관리자가 `/admin`의 신고 관리 탭에서 처리/글 삭제
+  - 관리자+신고자 계정은 신고 카드에서 진입 시 상세 확인 예외
+- 마이페이지:
+  - 승인 대기 글 관리
+  - 내 활동 탭: `내 글`, `내 질문(내가 작성한 최상위 질문 댓글)`, `북마크`, `좋아요`
