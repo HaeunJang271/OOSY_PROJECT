@@ -50,9 +50,6 @@ export default function PointsPage() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
       <h1 className="mb-2 text-xl font-semibold text-neutral-950">포인트</h1>
-      <p className="text-sm text-neutral-800">
-        아직 포인트 적립/사용 기능은 준비 중입니다.
-      </p>
       <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
         <p className="text-xs font-medium text-neutral-500">현재 포인트</p>
         <p className="mt-1 text-2xl font-bold text-neutral-950">
