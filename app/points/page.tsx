@@ -65,9 +65,20 @@ export default function PointsPage() {
       "현재 보상은 관리자가 확인 후 수동으로 지급합니다. 신청하시겠습니까?",
     );
     if (!ok) return;
+    const phone = window.prompt("전화번호를 입력해 주세요. (예: 010-1234-5678)");
+    const cleaned = (phone ?? "").trim();
+    if (!cleaned) return;
+    const only = cleaned.replace(/\s/g, "");
+    const valid =
+      /^01[0-9]-?\d{3,4}-?\d{4}$/.test(only) || /^\d{9,12}$/.test(only);
+    if (!valid) {
+      alert("전화번호 형식이 올바르지 않습니다.");
+      return;
+    }
     try {
       await submitRewardRequest({
         userId,
+        phone: only,
         rewardKey: input.rewardKey,
         rewardName: input.rewardName,
         costPoints: input.costPoints,

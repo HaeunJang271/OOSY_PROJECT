@@ -151,6 +151,9 @@ service cloud.firestore {
     match /rewardRequests/{requestId} {
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 9
+        && request.resource.data.phone.size() <= 20
         && request.resource.data.status == 'open'
         && request.resource.data.costPoints is int
         && request.resource.data.costPoints > 0
@@ -164,11 +167,12 @@ service cloud.firestore {
         && request.resource.data.rewardName is string
         && request.resource.data.rewardName.size() > 0
         && request.resource.data.keys().hasAll([
-          'userId', 'rewardKey', 'rewardName', 'costPoints', 'status', 'createdAt'
+          'userId', 'phone', 'rewardKey', 'rewardName', 'costPoints', 'status', 'createdAt'
         ]);
       allow read: if isAdmin();
       allow update: if isAdmin()
         && request.resource.data.userId == resource.data.userId
+        && request.resource.data.phone == resource.data.phone
         && request.resource.data.rewardKey == resource.data.rewardKey
         && request.resource.data.rewardName == resource.data.rewardName
         && request.resource.data.costPoints == resource.data.costPoints
@@ -208,7 +212,9 @@ service cloud.firestore {
           )
           || (
             ('points' in resource.data)
-            && request.resource.data.points == resource.data.points
+            && request.resource.data.points is int
+            && request.resource.data.points >= 0
+            && request.resource.data.points <= resource.data.points
           )
         )
         && (

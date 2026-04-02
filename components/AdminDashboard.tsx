@@ -470,6 +470,9 @@ export function AdminDashboard() {
                       신청자: {nicknameByUid[r.userId] ?? shortUid(r.userId)}
                     </p>
                     <p className="mt-1 text-xs text-zinc-600">
+                      전화번호: {r.phone}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-600">
                       신청일: {formatDate(r.createdAt)}
                     </p>
                   </div>
