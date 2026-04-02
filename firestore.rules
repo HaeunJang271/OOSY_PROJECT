@@ -201,7 +201,7 @@ service cloud.firestore {
             && request.resource.data.points == 10))
         && (!('nickname' in request.resource.data)
           || validNickname(request.resource.data.nickname));
-      allow update: if signedIn()
+      allow update: if (signedIn()
         && request.auth.uid == uid
         && (
           !('points' in request.resource.data)
@@ -220,6 +220,19 @@ service cloud.firestore {
         && (
           !('nickname' in request.resource.data)
           || validNickname(request.resource.data.nickname)
+        ))
+        || (
+          isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['points'])
+          && request.resource.data.points is int
+          && (
+            (!resource.data.keys().hasAny(['points']) && request.resource.data.points == 1)
+            || (
+              resource.data.keys().hasAny(['points'])
+              && resource.data.points is int
+              && request.resource.data.points == resource.data.points + 1
+            )
+          )
         );
       allow delete: if false;
     }

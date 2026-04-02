@@ -6,7 +6,7 @@ import {
   deletePostAsAdmin,
   fetchApprovedRecent,
   fetchPendingPosts,
-  setPostStatus,
+  approvePostAndAwardAuthor,
 } from "@/lib/posts";
 import {
   fetchPostReports,
@@ -134,7 +134,7 @@ export function AdminDashboard() {
     setBusy(true);
     setError(null);
     try {
-      await setPostStatus(id, "approved");
+      await approvePostAndAwardAuthor(id);
       setPending((prev) => prev.filter((p) => p.id !== id));
       await loadApproved();
     } catch (e) {

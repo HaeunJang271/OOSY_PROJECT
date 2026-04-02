@@ -7,6 +7,7 @@ import {
   limit,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
   updateDoc,
   where,
@@ -18,6 +19,10 @@ import { getFirebaseDb } from "@/lib/firebase";
 import { timestampMs } from "@/lib/format";
 
 const POSTS = "posts";
+const USERS = "users";
+
+/** 글 승인 시 작성자에게 지급하는 포인트 */
+export const POINTS_PER_POST_APPROVAL = 1;
 
 function mapPost(id: string, data: Record<string, unknown>): Post {
   return {
@@ -240,6 +245,38 @@ export async function createPost(input: {
 export async function setPostStatus(postId: string, status: PostStatus): Promise<void> {
   const db = getFirebaseDb();
   await updateDoc(doc(db, POSTS, postId), { status });
+}
+
+/** 관리자: 글 승인 + 작성자 포인트 +POINTS_PER_POST_APPROVAL (원자적) */
+export async function approvePostAndAwardAuthor(postId: string): Promise<void> {
+  const db = getFirebaseDb();
+  const postRef = doc(db, POSTS, postId);
+  await runTransaction(db, async (tx) => {
+    const postSnap = await tx.get(postRef);
+    if (!postSnap.exists()) {
+      throw new Error("글을 찾을 수 없습니다.");
+    }
+    const pdata = postSnap.data() as Record<string, unknown>;
+    if (pdata.status !== "pending") {
+      throw new Error("이미 처리된 글입니다.");
+    }
+    const authorId = String(pdata.authorId ?? "");
+    if (!authorId) {
+      throw new Error("작성자 정보가 없습니다.");
+    }
+    const userRef = doc(db, USERS, authorId);
+    const userSnap = await tx.get(userRef);
+    if (!userSnap.exists()) {
+      throw new Error(
+        "작성자 회원 정보가 없어 포인트를 지급할 수 없습니다. 사용자 로그인 후 다시 시도해 주세요.",
+      );
+    }
+    const u = userSnap.data() as { points?: unknown };
+    const cur =
+      typeof u.points === "number" && Number.isFinite(u.points) ? u.points : 0;
+    tx.update(postRef, { status: "approved" as PostStatus });
+    tx.update(userRef, { points: cur + POINTS_PER_POST_APPROVAL });
+  });
 }
 
 const COMMENTS = "comments";
