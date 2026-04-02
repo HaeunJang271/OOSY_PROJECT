@@ -31,4 +31,5 @@ export interface Comment {
 export interface UserProfile {
   uid: string;
   nickname?: string;
+  points?: number;
 }

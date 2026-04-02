@@ -97,6 +97,7 @@ export async function fetchUserProfile(uid: string): Promise<UserProfile | null>
   return {
     uid,
     nickname: typeof data.nickname === "string" ? data.nickname : undefined,
+    points: typeof data.points === "number" ? data.points : undefined,
   };
 }
 
@@ -189,6 +190,10 @@ export async function setNickname(params: {
       userRef,
       {
         nickname,
+        points:
+          userSnap.exists() && typeof (userSnap.data() as { points?: unknown }).points === "number"
+            ? ((userSnap.data() as { points?: number }).points ?? 10)
+            : 10,
         createdAt: userSnap.exists()
           ? (userSnap.data() as { createdAt?: unknown }).createdAt ?? serverTimestamp()
           : serverTimestamp(),
