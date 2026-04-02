@@ -52,11 +52,15 @@ function buildHomePath(parts: { category: string; region: string }): string {
 
 export function HomePosts() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const searchParams = useSearchParams();
   const category = useMemo(
-    () => resolveCategory(searchParams.get("category")),
-    [searchParams],
+    () => {
+      const raw = searchParams.get("category");
+      if (!isAdmin && raw === "공지") return CATEGORY_ALL;
+      return resolveCategory(raw);
+    },
+    [searchParams, isAdmin],
   );
   const region = useMemo(
     () => resolveRegion(searchParams.get("region")),
@@ -142,7 +146,10 @@ export function HomePosts() {
                 className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 pr-10 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
               >
                 <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
-                {POST_CATEGORIES.map((c) => (
+                {(isAdmin
+                  ? POST_CATEGORIES
+                  : POST_CATEGORIES.filter((c) => c !== "공지")
+                ).map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>

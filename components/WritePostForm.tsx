@@ -16,7 +16,7 @@ type Props = {
 };
 
 export function WritePostForm({ mode = "create", initialPost = null }: Props) {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -35,6 +35,13 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
     setRegion(initialPost.region);
     setCommentsEnabled(initialPost.commentsEnabled ?? true);
   }, [mode, initialPost]);
+
+  useEffect(() => {
+    // 관리자가 아니면 공지 카테고리를 선택할 수 없음
+    if (!isAdmin && category === "공지") {
+      setCategory("강좌");
+    }
+  }, [isAdmin, category]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -83,6 +90,10 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
 
   if (!user) return null;
 
+  const categoryOptions = isAdmin
+    ? POST_CATEGORIES
+    : POST_CATEGORIES.filter((c) => c !== "공지");
+
   return (
     <form onSubmit={handleSubmit} className="w-full min-w-0 space-y-4">
       <div className="grid w-full min-w-0 gap-4 sm:grid-cols-2">
@@ -96,7 +107,7 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
             onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-950 placeholder:text-zinc-500"
           >
-            {POST_CATEGORIES.map((c) => (
+            {categoryOptions.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
@@ -168,8 +179,8 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
         <div
           className={`flex w-full min-w-0 flex-col overflow-hidden rounded-lg border border-zinc-300 bg-white ${
             tab === "edit" || (tab === "preview" && !content.trim())
-              ? "h-[20rem]"
-              : "min-h-[20rem]"
+              ? "h-80"
+              : "min-h-80"
           }`}
         >
           {tab === "edit" ? (
