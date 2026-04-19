@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OOSY — 학교 밖 청소년 커뮤니티",
+  title: "이으리 — 학교 밖 청소년 커뮤니티",
   description: "정보와 짧은 강좌 글을 나누는 MVP",
 };
 

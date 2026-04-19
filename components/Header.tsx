@@ -52,7 +52,7 @@ export function Header() {
 
           <div className="flex justify-center">
             <Link href="/" className="text-base font-semibold text-white tracking-tight">
-              OOSY
+              이으리
             </Link>
           </div>
 
