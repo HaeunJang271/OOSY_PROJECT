@@ -10,6 +10,16 @@ import type { Post } from "@/lib/types";
 
 type Tab = "edit" | "preview";
 
+function WriteFormSelectChevron() {
+  return (
+    <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-zinc-500">
+      <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 7.5L10 12.5L15 7.5" />
+      </svg>
+    </span>
+  );
+}
+
 type Props = {
   mode?: "create" | "edit";
   initialPost?: Post | null;
@@ -94,42 +104,51 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
     ? POST_CATEGORIES
     : POST_CATEGORIES.filter((c) => c !== "공지");
 
+  const selectClass =
+    "w-full appearance-none rounded-lg border border-zinc-300 bg-white py-2 pl-3 pr-11 text-zinc-950 outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/10";
+
   return (
     <form onSubmit={handleSubmit} className="w-full min-w-0 space-y-4">
-      <div className="grid w-full min-w-0 gap-4 sm:grid-cols-2">
+      <div className="grid w-full min-w-0 grid-cols-1 gap-4">
         <div>
           <label htmlFor="category" className="mb-1 block text-sm font-medium text-zinc-800">
             주제
           </label>
-          <select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-950 placeholder:text-zinc-500"
-          >
-            {categoryOptions.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className={selectClass}
+            >
+              {categoryOptions.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            <WriteFormSelectChevron />
+          </div>
         </div>
         <div>
           <label htmlFor="region" className="mb-1 block text-sm font-medium text-zinc-800">
             지역
           </label>
-          <select
-            id="region"
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-950 placeholder:text-zinc-500"
-          >
-            {REGIONS.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="region"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className={selectClass}
+            >
+              {REGIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+            <WriteFormSelectChevron />
+          </div>
         </div>
       </div>
       <div className="w-full min-w-0">
