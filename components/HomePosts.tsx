@@ -24,8 +24,6 @@ function resolveCategory(raw: string | null): string {
 }
 
 function resolveRegion(raw: string | null): string {
-  // 홈에서는 지역 필터를 "전체(=전국)" 하나만 남기기로 했습니다.
-  // URL에 `전체`가 들어와도 `전국`으로 매핑합니다.
   const REGION_HOME_ALL = REGIONS[0];
   if (!raw) return REGION_HOME_ALL;
   if (raw === REGION_ALL) return REGION_HOME_ALL;
@@ -84,10 +82,7 @@ export function HomePosts() {
     setLoading(true);
     setError(null);
     try {
-      const list = await fetchApprovedPosts({
-        category,
-        region,
-      });
+      const list = await fetchApprovedPosts({ category, region });
       const hiddenIds = user?.uid
         ? await fetchMyReportedPostIds(user.uid)
         : new Set<string>();
@@ -107,11 +102,9 @@ export function HomePosts() {
     } catch (e) {
       console.error(e);
       if (isIndexBuildingError(e)) {
-        setError(
-          "Firestore 인덱스가 아직 생성 중입니다. 콘솔의 인덱스 탭에서 상태가 ‘사용 가능’이 될 때까지(보통 수 분) 기다린 뒤 새로고침해 주세요.",
-        );
+        setError("Firestore 인덱스가 생성 중입니다. 잠시 후 새로고침해 주세요.");
       } else {
-        setError("글을 불러오지 못했습니다. 환경 변수와 Firestore 규칙·인덱스를 확인해 주세요.");
+        setError("글을 불러오지 못했습니다.");
       }
       setPosts([]);
       setNicknameByUid({});
@@ -124,18 +117,18 @@ export function HomePosts() {
     load();
   }, [load]);
 
+  const selectClass = "w-full appearance-none rounded-[11px] border-[3px] border-black/[0.04] bg-[#fafafc] px-3 py-2 pr-8 text-[15px] text-[#1d1d1f] tracking-[-0.016em] outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/30";
+
   return (
-    <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+    <div className="space-y-5">
+      {/* 필터 */}
+      <section className="rounded-xl bg-white px-4 py-4" style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}>
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#1d1d1f]/40">
           필터
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label
-              htmlFor="home-filter-category"
-              className="mb-1 block text-sm font-medium text-neutral-800"
-            >
+            <label htmlFor="home-filter-category" className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]/70 tracking-[-0.012em]">
               주제
             </label>
             <div className="relative">
@@ -143,39 +136,22 @@ export function HomePosts() {
                 id="home-filter-category"
                 value={category}
                 onChange={(e) => navigateWith({ category: e.target.value })}
-                className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 pr-10 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
+                className={selectClass}
               >
                 <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
-                {(isAdmin
-                  ? POST_CATEGORIES
-                  : POST_CATEGORIES.filter((c) => c !== "공지")
-                ).map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                {(isAdmin ? POST_CATEGORIES : POST_CATEGORIES.filter((c) => c !== "공지")).map((c) => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-500">
-                <svg
-                  aria-hidden
-                  viewBox="0 0 20 20"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#1d1d1f]/40">
+                <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 7.5L10 12.5L15 7.5" />
                 </svg>
               </span>
             </div>
           </div>
           <div>
-            <label
-              htmlFor="home-filter-region"
-              className="mb-1 block text-sm font-medium text-neutral-800"
-            >
+            <label htmlFor="home-filter-region" className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]/70 tracking-[-0.012em]">
               지역
             </label>
             <div className="relative">
@@ -183,25 +159,14 @@ export function HomePosts() {
                 id="home-filter-region"
                 value={region}
                 onChange={(e) => navigateWith({ region: e.target.value })}
-                className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 pr-10 text-sm text-zinc-950 shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
+                className={selectClass}
               >
                 {REGIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
+                  <option key={r} value={r}>{r}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-500">
-                <svg
-                  aria-hidden
-                  viewBox="0 0 20 20"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#1d1d1f]/40">
+                <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 7.5L10 12.5L15 7.5" />
                 </svg>
               </span>
@@ -211,24 +176,39 @@ export function HomePosts() {
       </section>
 
       {loading && (
-        <p className="text-sm text-neutral-700">불러오는 중…</p>
+        <p className="text-[15px] text-[#1d1d1f]/50 tracking-[-0.016em]">불러오는 중…</p>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="text-[15px] text-red-500 tracking-[-0.016em]">{error}</p>
+      )}
 
       {!loading && !error && posts.length === 0 && (
-        <p className="text-sm text-neutral-800">첫 번째 글을 작성해 주세요!</p>
+        <div className="rounded-xl bg-white px-6 py-12 text-center" style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}>
+          <p className="text-[17px] font-semibold text-[#1d1d1f] tracking-[-0.022em]">아직 글이 없어요</p>
+          <p className="mt-1.5 text-[14px] text-[#1d1d1f]/50 tracking-[-0.016em]">첫 번째 글을 작성해 보세요</p>
+          <Link
+            href="/write"
+            className="mt-5 inline-flex items-center rounded-full bg-[#0071e3] px-5 py-2 text-[15px] font-medium text-white tracking-[-0.016em] hover:bg-[#0077ed]"
+          >
+            글쓰기
+          </Link>
+        </div>
       )}
 
       {posts.length > 0 && (
-        <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
+        <ul className="space-y-2.5">
           {posts.map((p) => (
-            <li key={p.id} className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4">
-              <div className="mb-1.5 flex items-center justify-between gap-2">
+            <li
+              key={p.id}
+              className="rounded-xl bg-white px-4 py-4"
+              style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}
+            >
+              <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
+                  <span className="rounded-full bg-[#f5f5f7] px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.008em] text-[#1d1d1f]/70">
                     {p.category}
                   </span>
-                  <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-950">
+                  <span className="rounded-full bg-[#0071e3]/10 px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.008em] text-[#0071e3]">
                     {p.region}
                   </span>
                 </div>
@@ -241,19 +221,19 @@ export function HomePosts() {
                   reporterId={user?.uid}
                   onDeleted={() => void load()}
                   onReported={() => void load()}
-                  triggerClassName="h-5 w-5 text-zinc-600 hover:bg-zinc-100"
+                  triggerClassName="h-5 w-5 text-[#1d1d1f]/40 hover:text-[#1d1d1f]/70"
                 />
               </div>
               <Link
                 href={`/posts/${p.id}`}
-                className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
+                className="block outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] rounded-lg"
               >
-                <h2 className="text-lg font-semibold leading-snug text-neutral-950">
+                <h2 className="text-[17px] font-semibold leading-[1.24] tracking-[-0.022em] text-[#1d1d1f]">
                   {p.title}
                 </h2>
-                <div className="mt-2 flex items-baseline justify-between gap-2 text-xs font-medium text-neutral-600">
-                  <span className="min-w-0 shrink">{formatDate(p.createdAt)}</span>
-                  <span className="shrink-0 text-right text-neutral-700">
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="text-[12px] tracking-[-0.008em] text-[#1d1d1f]/40">{formatDate(p.createdAt)}</span>
+                  <span className="text-[12px] tracking-[-0.008em] text-[#1d1d1f]/50">
                     {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
                   </span>
                 </div>
