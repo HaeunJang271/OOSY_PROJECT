@@ -116,7 +116,7 @@ export function PostActionsMenu({
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={deleting}
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-amber-900/90 hover:bg-amber-100/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1 disabled:opacity-50 ${triggerClassName ?? ""}`}
+        className={`btn-glass flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#1d1d1f]/50 hover:text-[#1d1d1f]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:opacity-50 ${triggerClassName ?? ""}`}
         aria-label="글 메뉴"
         aria-expanded={open}
         aria-haspopup="true"
@@ -136,15 +136,16 @@ export function PostActionsMenu({
       {open && (
         <div
           role="menu"
-          className={`absolute top-full z-20 mt-1 min-w-32 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg ${
+          className={`absolute top-full z-20 mt-1 min-w-32 overflow-hidden rounded-xl py-1 ${
             align === "right" ? "right-0" : "left-0"
           }`}
+          style={{ background: "rgba(255,255,255,0.78)", backdropFilter: "saturate(180%) blur(20px)", WebkitBackdropFilter: "saturate(180%) blur(20px)", border: "1px solid rgba(255,255,255,0.9)", boxShadow: "0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.95)" }}
         >
           {showEdit && (
             <Link
               role="menuitem"
               href={`/posts/${postId}/edit`}
-              className="block px-3 py-2 text-sm text-zinc-900 hover:bg-zinc-100"
+              className="block px-4 py-2.5 text-[14px] tracking-[-0.016em] text-[#1d1d1f] hover:bg-black/[0.04]"
               onClick={() => setOpen(false)}
             >
               수정
@@ -155,7 +156,7 @@ export function PostActionsMenu({
               type="button"
               role="menuitem"
               disabled={deleting}
-              className="w-full px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+              className="w-full px-4 py-2.5 text-left text-[14px] tracking-[-0.016em] text-red-500 hover:bg-red-500/[0.06] disabled:opacity-50"
               onClick={() => void handleDelete()}
             >
               {deleting ? "삭제 중…" : "삭제"}
@@ -165,7 +166,7 @@ export function PostActionsMenu({
             <button
               type="button"
               role="menuitem"
-              className="w-full px-3 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100"
+              className="w-full px-4 py-2.5 text-left text-[14px] tracking-[-0.016em] text-[#1d1d1f] hover:bg-black/[0.04]"
               onClick={() => void handleReport()}
             >
               신고

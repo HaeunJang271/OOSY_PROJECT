@@ -30,65 +30,53 @@ export function MyPendingPosts({ authorId }: Props) {
       setPosts(list);
     } catch (e) {
       console.error(e);
-      if (isIndexBuildingError(e)) {
-        setError(
-          "Firestore 인덱스가 아직 생성 중입니다. 콘솔 인덱스 탭에서 ‘사용 가능’이 될 때까지(보통 수 분) 기다린 뒤 새로고침해 주세요.",
-        );
-      } else {
-        setError("목록을 불러오지 못했습니다.");
-      }
+      setError(isIndexBuildingError(e) ? "인덱스 생성 중입니다. 잠시 후 새로고침해 주세요." : "목록을 불러오지 못했습니다.");
       setPosts([]);
     } finally {
       setLoading(false);
     }
   }, [authorId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   return (
-    <section className="mt-8 border-t border-zinc-200 pt-6">
-      <h2 className="text-base font-semibold text-neutral-950">승인 대기 중인 글</h2>
-      <p className="mt-1 text-xs text-neutral-600">
-        관리자 승인 전까지 홈 목록에는 나오지 않습니다. 제목을 눌러 내용을 확인할 수 있어요.
+    <section className="mt-8">
+      <h2 className="mb-1 text-[17px] font-semibold tracking-[-0.022em] text-[#1d1d1f]">승인 대기 중인 글</h2>
+      <p className="mb-4 text-[13px] tracking-[-0.012em] text-[#1d1d1f]/50">
+        관리자 승인 전까지 홈 목록에 나오지 않습니다.
       </p>
 
-      {loading && (
-        <p className="mt-4 text-sm text-neutral-700">불러오는 중…</p>
-      )}
-      {error && (
-        <p className="mt-4 text-sm text-red-600">{error}</p>
-      )}
+      {loading && <p className="text-[15px] text-[#1d1d1f]/50">불러오는 중…</p>}
+      {error && <p className="text-[15px] text-red-500">{error}</p>}
       {!loading && !error && posts.length === 0 && (
-        <p className="mt-4 text-sm text-neutral-700">승인 대기 중인 글이 없습니다.</p>
+        <p className="text-[15px] text-[#1d1d1f]/50">승인 대기 중인 글이 없습니다.</p>
       )}
       {!loading && !error && posts.length > 0 && (
-        <ul className="mt-4 divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white">
+        <ul className="space-y-2">
           {posts.map((p) => (
-            <li key={p.id} className="px-3 py-3.5 sm:px-4">
-              <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                <span className="min-w-0 text-xs text-neutral-500">
+            <li
+              key={p.id}
+              className="rounded-xl bg-white px-4 py-3.5"
+              style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}
+            >
+              <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[12px] tracking-[-0.008em] text-[#1d1d1f]/40">
                   {p.category} · {p.region}
                 </span>
-                <span className="inline-flex shrink-0 items-center gap-0.5">
-                  <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
+                <span className="inline-flex shrink-0 items-center gap-1">
+                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.008em] text-amber-700">
                     승인 대기
                   </span>
-                  <PostActionsMenu
-                    postId={p.id}
-                    authorId={authorId}
-                    onDeleted={() => void load()}
-                  />
+                  <PostActionsMenu postId={p.id} authorId={authorId} onDeleted={() => void load()} />
                 </span>
               </div>
               <Link
                 href={`/posts/${p.id}`}
-                className="block font-medium text-neutral-950 hover:underline"
+                className="block text-[15px] font-medium tracking-[-0.016em] text-[#1d1d1f] hover:text-[#0071e3]"
               >
                 {p.title}
               </Link>
-              <p className="mt-1.5 text-xs text-neutral-500">{formatDate(p.createdAt)}</p>
+              <p className="mt-1.5 text-[12px] tracking-[-0.008em] text-[#1d1d1f]/40">{formatDate(p.createdAt)}</p>
             </li>
           ))}
         </ul>

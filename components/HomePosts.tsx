@@ -183,12 +183,12 @@ export function HomePosts() {
       )}
 
       {!loading && !error && posts.length === 0 && (
-        <div className="rounded-xl bg-white px-6 py-12 text-center" style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}>
+        <div className="py-5 text-center">
           <p className="text-[17px] font-semibold text-[#1d1d1f] tracking-[-0.022em]">아직 글이 없어요</p>
           <p className="mt-1.5 text-[14px] text-[#1d1d1f]/50 tracking-[-0.016em]">첫 번째 글을 작성해 보세요</p>
           <Link
             href="/write"
-            className="mt-5 inline-flex items-center rounded-full bg-[#0071e3] px-5 py-2 text-[15px] font-medium text-white tracking-[-0.016em] hover:bg-[#0077ed]"
+            className="btn-glass-blue mt-5 inline-flex items-center rounded-full px-5 py-2 text-[15px] font-medium text-white tracking-[-0.016em]"
           >
             글쓰기
           </Link>

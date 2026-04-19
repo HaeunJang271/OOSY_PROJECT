@@ -151,14 +151,14 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
           <label htmlFor="content" className="block text-sm font-medium text-zinc-800">
             본문
           </label>
-          <div className="flex rounded-lg border border-zinc-300 bg-zinc-100 p-0.5 text-xs font-medium">
+          <div className="flex rounded-full p-0.5 text-xs font-medium" style={{ background: "rgba(0,0,0,0.06)", backdropFilter: "blur(8px)" }}>
             <button
               type="button"
               onClick={() => setTab("edit")}
-              className={`rounded-md px-2 py-1 ${
+              className={`rounded-full px-3 py-1 text-[12px] font-medium tracking-[-0.01em] transition-all ${
                 tab === "edit"
-                  ? "bg-white text-zinc-950 shadow-sm"
-                  : "text-zinc-600 hover:text-zinc-900"
+                  ? "btn-glass text-[#1d1d1f]"
+                  : "text-[#1d1d1f]/50 hover:text-[#1d1d1f]/80"
               }`}
             >
               작성
@@ -166,10 +166,10 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
             <button
               type="button"
               onClick={() => setTab("preview")}
-              className={`rounded-md px-2 py-1 ${
+              className={`rounded-full px-3 py-1 text-[12px] font-medium tracking-[-0.01em] transition-all ${
                 tab === "preview"
-                  ? "bg-white text-zinc-950 shadow-sm"
-                  : "text-zinc-600 hover:text-zinc-900"
+                  ? "btn-glass text-[#1d1d1f]"
+                  : "text-[#1d1d1f]/50 hover:text-[#1d1d1f]/80"
               }`}
             >
               미리보기
@@ -221,15 +221,15 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
         </label>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <p className="text-xs text-zinc-700">
-        {mode === "edit"
-          ? "승인 전까지 수정할 수 있습니다. 저장 후에도 관리자 승인이 있어야 홈에 공개됩니다."
-          : "제출 후 관리자 승인이 있으면 홈에 공개됩니다."}
-      </p>
+      {mode === "edit" && (
+        <p className="text-[13px] tracking-[-0.012em] text-[#1d1d1f]/50">
+          승인 전까지 수정할 수 있습니다.
+        </p>
+      )}
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-lg bg-zinc-900 py-3 text-sm font-medium text-[#ffffff] disabled:opacity-50"
+        className="w-full rounded-xl bg-[#1d1d1f] py-3.5 text-[15px] font-medium text-white tracking-[-0.016em] hover:bg-black active:bg-[#1d1d1f]/80 disabled:opacity-50"
       >
         {submitting
           ? mode === "edit"

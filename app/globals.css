@@ -28,6 +28,46 @@ html {
   color-scheme: light;
 }
 
+/* ── 유리 질감 버튼 ───────────────────────────────────────── */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+.btn-glass:active {
+  background: rgba(237, 237, 242, 0.9);
+  box-shadow: 0 0 0 rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.btn-glass-dark {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.btn-glass-dark:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.btn-glass-blue {
+  background: rgba(0, 113, 227, 0.88);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border: 1px solid rgba(41, 151, 255, 0.45);
+  box-shadow: 0 1px 4px rgba(0, 113, 227, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-glass-blue:hover {
+  background: rgba(0, 119, 237, 0.92);
+}
+.btn-glass-blue:active {
+  background: rgba(0, 100, 210, 0.95);
+}
+
 /* react-markdown 본문 */
 .markdown-content {
   font-size: 1rem;

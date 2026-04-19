@@ -55,29 +55,7 @@ export function HeaderSearchPanel({ open, onClose }: Props) {
         onSubmit={handleSubmit}
         className="mx-auto max-w-2xl px-4 pb-4 pt-3"
       >
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-neutral-900">검색</p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-600 hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2"
-            aria-label="검색 닫기"
-          >
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             ref={inputRef}
             type="search"

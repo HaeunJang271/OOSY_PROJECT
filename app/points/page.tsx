@@ -105,8 +105,7 @@ export default function PointsPage() {
         <h2 className="mb-3 text-sm font-semibold text-neutral-950">보상</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[
-            { rewardKey: "chupa" as const, title: "편의점 츄파춥스", costPoints: 5, sub: "5P" },
-            { rewardKey: "gift_1000" as const, title: "편의점 상품권 1000원", costPoints: 10, sub: "10P" },
+{ rewardKey: "gift_1000" as const, title: "편의점 상품권 1000원", costPoints: 10, sub: "10P" },
             { rewardKey: "gift_2000" as const, title: "편의점 상품권 2000원", costPoints: 20, sub: "20P" },
             { rewardKey: "gift_5000" as const, title: "편의점 상품권 5000원", costPoints: 50, sub: "50P" },
             { rewardKey: "gift_10000" as const, title: "편의점 상품권 10000원", costPoints: 100, sub: "100P" },

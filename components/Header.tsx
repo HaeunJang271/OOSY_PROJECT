@@ -32,7 +32,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => setSearchOpen((v) => !v)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+              className="btn-glass-dark inline-flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
               aria-expanded={searchOpen}
               aria-controls="header-search-panel"
               aria-label={searchOpen ? "검색 닫기" : "검색 열기"}
@@ -60,7 +60,7 @@ export function Header() {
             {user && (
               <Link
                 href="/points"
-                className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-white border border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+                className="btn-glass-dark inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
                 aria-label="포인트 페이지로 이동"
               >
                 {loading ? "…" : `${points}P`}
@@ -69,7 +69,7 @@ export function Header() {
             {!user && !loading && (
               <Link
                 href="/login"
-                className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-[#0071e3] text-white hover:bg-[#0077ed] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+                className="btn-glass-blue inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
               >
                 로그인
               </Link>
