@@ -21,6 +21,15 @@ service cloud.firestore {
     }
 
     /** 관리자_ 형식은 admins 문서가 있는 요청만 허용 */
+    function rewardCost(key) {
+      return key == 'chupa' ? 5
+        : key == 'gift_1000' ? 10
+        : key == 'gift_2000' ? 20
+        : key == 'gift_5000' ? 50
+        : key == 'gift_10000' ? 100
+        : -1;
+    }
+
     function validNickname(nickname) {
       return nickname is string
         && (nickname.matches('^학밖청_[가-힣A-Za-z0-9]{2,3}$')
@@ -156,7 +165,7 @@ service cloud.firestore {
         && request.resource.data.phone.size() <= 20
         && request.resource.data.status == 'open'
         && request.resource.data.costPoints is int
-        && request.resource.data.costPoints > 0
+        && request.resource.data.costPoints == rewardCost(request.resource.data.rewardKey)
         && request.resource.data.rewardKey in [
           'chupa',
           'gift_1000',
@@ -238,18 +247,28 @@ service cloud.firestore {
     }
 
     match /analyticsDaily/{docId} {
-      // 집계 문서(YYYY-MM-DD)는 관리자만 읽기
       allow read: if isAdmin();
-      // 일일 방문수 집계 문서 생성/업데이트는 로그인 사용자 허용(정확한 +1 검증은 dedupe 문서로 보강)
-      allow create: if signedIn();
-      allow update: if signedIn();
+      // 요약 문서(YYYY-MM-DD): visits +1 및 updatedAt만 허용
+      allow create: if signedIn()
+        && (docId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          || (request.resource.data.userId == request.auth.uid));
+      allow update: if signedIn()
+        && docId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['visits', 'updatedAt'])
+        && request.resource.data.visits is int
+        && resource.data.visits is int
+        && request.resource.data.visits == resource.data.visits + 1;
       allow delete: if false;
     }
 
     match /analyticsTotals/{docId} {
       allow read: if isAdmin();
       allow create: if signedIn();
-      allow update: if signedIn();
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'updatedAt'])
+        && request.resource.data.count is int
+        && resource.data.count is int
+        && request.resource.data.count == resource.data.count + 1;
       allow delete: if false;
     }
 
