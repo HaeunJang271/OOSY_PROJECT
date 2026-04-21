@@ -9,7 +9,6 @@ import {
   runTransaction,
   serverTimestamp,
   where,
-  documentId,
   type Firestore,
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
@@ -110,17 +109,21 @@ export async function fetchNicknamesByUids(
   const db = getFirebaseDb();
   const result: Record<string, string> = {};
 
+  // users 컬렉션은 본인/관리자만 읽을 수 있으므로,
+  // 공개 조회는 nicknames(닉네임 -> uid 매핑)에서 역조회한다.
   for (let i = 0; i < uniq.length; i += 10) {
     const chunk = uniq.slice(i, i + 10);
     const q = query(
-      collection(db, "users"),
-      where(documentId(), "in", chunk),
+      collection(db, "nicknames"),
+      where("uid", "in", chunk),
     );
     const snap = await getDocs(q);
     snap.forEach((d) => {
-      const data = d.data() as { nickname?: unknown };
-      if (typeof data.nickname === "string" && data.nickname.trim()) {
-        result[d.id] = data.nickname;
+      const data = d.data() as { uid?: unknown };
+      const uid = typeof data.uid === "string" ? data.uid.trim() : "";
+      const nickname = d.id.trim();
+      if (uid && nickname && !result[uid]) {
+        result[uid] = nickname;
       }
     });
   }
