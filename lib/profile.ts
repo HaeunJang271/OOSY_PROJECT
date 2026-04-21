@@ -171,19 +171,23 @@ export async function setNickname(params: {
       return;
     }
 
-    if (!nickSnap.exists()) {
-      tx.set(nickRef, { uid: params.uid, createdAt: serverTimestamp() });
-    }
-
+    let canDeleteOldNickname = false;
     if (oldNickname) {
       const oldRef = doc(db, "nicknames", oldNickname);
       const oldSnap = await tx.get(oldRef);
       if (oldSnap.exists()) {
         const oldOwner = (oldSnap.data() as { uid?: unknown }).uid;
-        if (oldOwner === params.uid) {
-          tx.delete(oldRef);
-        }
+        canDeleteOldNickname = oldOwner === params.uid;
       }
+    }
+
+    if (!nickSnap.exists()) {
+      tx.set(nickRef, { uid: params.uid, createdAt: serverTimestamp() });
+    }
+
+    if (oldNickname && canDeleteOldNickname) {
+      const oldRef = doc(db, "nicknames", oldNickname);
+      tx.delete(oldRef);
     }
 
     tx.set(
