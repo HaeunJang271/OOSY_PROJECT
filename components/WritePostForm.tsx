@@ -83,11 +83,8 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
           region,
           authorId: user.uid,
           commentsEnabled,
+          status: isAdmin && category === "공지" ? "approved" : undefined,
         });
-        // 관리자가 작성한 공지 글은 즉시 공개되도록 자동 승인한다.
-        if (isAdmin && category === "공지") {
-          await setPostStatus(id, "approved");
-        }
         router.push(`/posts/${id}`);
       }
     } catch (err) {

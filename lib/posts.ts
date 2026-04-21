@@ -230,6 +230,7 @@ export async function createPost(input: {
   region: string;
   authorId: string;
   commentsEnabled: boolean;
+  status?: PostStatus;
 }): Promise<string> {
   const db = getFirebaseDb();
   const ref = await addDoc(collection(db, POSTS), {
@@ -238,7 +239,7 @@ export async function createPost(input: {
     category: input.category,
     region: input.region,
     authorId: input.authorId,
-    status: "pending",
+    status: (input.status ?? "pending") as PostStatus,
     createdAt: serverTimestamp(),
     commentsEnabled: Boolean(input.commentsEnabled),
   });

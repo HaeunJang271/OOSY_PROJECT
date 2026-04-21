@@ -44,7 +44,10 @@ service cloud.firestore {
         || isAdmin();
       allow create: if signedIn()
         && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.status == 'pending'
+        && (
+          request.resource.data.status == 'pending'
+          || (isAdmin() && request.resource.data.category == '공지' && request.resource.data.status == 'approved')
+        )
         && (request.resource.data.category != '공지' || isAdmin())
         && request.resource.data.keys().hasAll([
           'title', 'content', 'category', 'region', 'authorId', 'status', 'createdAt', 'commentsEnabled'

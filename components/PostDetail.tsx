@@ -125,13 +125,15 @@ export function PostDetail({ postId }: Props) {
       }
     } catch (e) {
       console.error(e);
-      if (isPermissionDeniedError(e) && !hasFetchedPost) {
+      if (hasFetchedPost) {
+        setError("일부 데이터를 불러오지 못했습니다.");
+      } else if (isPermissionDeniedError(e)) {
         setAccessDenied(true);
-        setError(null);
+        setPost(null);
       } else {
         setError("불러오기에 실패했습니다.");
+        setPost(null);
       }
-      setPost(null);
       setComments([]);
       setNicknameByUid({});
     } finally {
