@@ -2,7 +2,7 @@ import { doc, getDoc, onSnapshot, setDoc, type Unsubscribe } from "firebase/fire
 import { getFirebaseDb } from "@/lib/firebase";
 
 const USERS = "users";
-export const DEFAULT_POINTS = 10;
+export const DEFAULT_POINTS = 5;
 
 export async function fetchMyPoints(uid: string): Promise<number> {
   const db = getFirebaseDb();
@@ -13,7 +13,7 @@ export async function fetchMyPoints(uid: string): Promise<number> {
   return Number.isFinite(n) ? n : 0;
 }
 
-/** points가 없으면 기본값(10P) 세팅. 실제로 세팅했으면 true */
+/** points가 없으면 기본값(5P) 세팅. 실제로 세팅했으면 true */
 export async function ensureMyPoints(uid: string): Promise<boolean> {
   const db = getFirebaseDb();
   const ref = doc(db, USERS, uid);

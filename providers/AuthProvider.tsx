@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           setIsAdmin(false);
         }
-        // points가 없으면 기본값(10P) 세팅
+        // points가 없으면 기본값(5P) 세팅
         try {
           const didInit = await ensureMyPoints(u.uid);
           if (didInit) {
@@ -139,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {loginRewardOpen && (
         <div className="fixed inset-x-0 top-14 z-50 mx-auto w-full max-w-2xl px-4">
           <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 shadow-sm">
-            <p className="font-semibold">로그인 보상 10P</p>
+            <p className="font-semibold">로그인 보상 5P</p>
             <button
               type="button"
               onClick={() => setLoginRewardOpen(false)}
