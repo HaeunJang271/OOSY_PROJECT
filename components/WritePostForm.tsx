@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createPost, updatePendingPost } from "@/lib/posts";
+import { createPost, setPostStatus, updatePendingPost } from "@/lib/posts";
 import { POST_CATEGORIES, REGIONS } from "@/lib/constants";
 import { useAuth } from "@/providers/AuthProvider";
 import { MarkdownContent } from "@/components/MarkdownContent";
@@ -84,6 +84,10 @@ export function WritePostForm({ mode = "create", initialPost = null }: Props) {
           authorId: user.uid,
           commentsEnabled,
         });
+        // 관리자가 작성한 공지 글은 즉시 공개되도록 자동 승인한다.
+        if (isAdmin && category === "공지") {
+          await setPostStatus(id, "approved");
+        }
         router.push(`/posts/${id}`);
       }
     } catch (err) {

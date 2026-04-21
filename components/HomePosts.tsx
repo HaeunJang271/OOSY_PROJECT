@@ -55,10 +55,9 @@ export function HomePosts() {
   const category = useMemo(
     () => {
       const raw = searchParams.get("category");
-      if (!isAdmin && raw === "공지") return CATEGORY_ALL;
       return resolveCategory(raw);
     },
-    [searchParams, isAdmin],
+    [searchParams],
   );
   const region = useMemo(
     () => resolveRegion(searchParams.get("region")),
@@ -139,7 +138,7 @@ export function HomePosts() {
                 className={selectClass}
               >
                 <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
-                {(isAdmin ? POST_CATEGORIES : POST_CATEGORIES.filter((c) => c !== "공지")).map((c) => (
+                {POST_CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
