@@ -37,6 +37,8 @@ export function PostDetail({ postId }: Props) {
   const [loadingPost, setLoadingPost] = useState(true);
   const [comments, setComments] = useState<Comment[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [hiddenByReport, setHiddenByReport] = useState(false);
   const [nicknameByUid, setNicknameByUid] = useState<Record<string, string>>({});
   const [liked, setLiked] = useState(false);
@@ -54,11 +56,14 @@ export function PostDetail({ postId }: Props) {
 
   const load = useCallback(async () => {
     setError(null);
+    setAccessDenied(false);
+    setNotFound(false);
     setLoadingPost(true);
     try {
       const p = await fetchPostById(postId);
       setPost(p);
       if (!p) {
+        setNotFound(true);
         setComments([]);
         return;
       }
@@ -118,8 +123,14 @@ export function PostDetail({ postId }: Props) {
       }
     } catch (e) {
       console.error(e);
-      setError("불러오기에 실패했습니다.");
+      if (isPermissionDeniedError(e)) {
+        setAccessDenied(true);
+        setError(null);
+      } else {
+        setError("불러오기에 실패했습니다.");
+      }
       setPost(null);
+      setComments([]);
       setNicknameByUid({});
     } finally {
       setLoadingPost(false);
@@ -206,7 +217,23 @@ export function PostDetail({ postId }: Props) {
     return <p className="text-sm text-zinc-700">불러오는 중…</p>;
   }
   if (post === null) {
-    return <p className="text-sm text-zinc-800">글을 찾을 수 없습니다.</p>;
+    if (error) {
+      return <p className="text-sm text-red-600">{error}</p>;
+    }
+    if (accessDenied) {
+      return (
+        <div className="space-y-2 rounded-lg border border-zinc-300 bg-white p-4 text-sm text-zinc-800">
+          <p>이 글은 아직 공개되지 않았거나 접근 권한이 없습니다.</p>
+          <Link href="/" className="font-medium text-zinc-950 underline">
+            홈으로
+          </Link>
+        </div>
+      );
+    }
+    if (notFound) {
+      return <p className="text-sm text-zinc-800">글을 찾을 수 없습니다.</p>;
+    }
+    return <p className="text-sm text-zinc-700">불러오는 중…</p>;
   }
 
   if (post.status !== "approved" && authLoading) {
