@@ -106,10 +106,14 @@ export async function isPostReportedByUser(input: {
 }): Promise<boolean> {
   const db = getFirebaseDb();
   const ref = doc(db, POST_REPORTS, `${input.postId}_${input.reporterId}`);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return false;
-  const data = snap.data() as { status?: string };
-  return data.status === "open";
+  try {
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return false;
+    const data = snap.data() as { status?: string };
+    return data.status === "open";
+  } catch {
+    return false;
+  }
 }
 
 export async function resolvePostReport(input: {

@@ -126,7 +126,7 @@ service cloud.firestore {
         && reportId == (request.resource.data.postId + '_' + request.auth.uid)
         && canReadPostId(request.resource.data.postId);
       allow read: if isAdmin()
-        || (signedIn() && resource.data.reporterId == request.auth.uid);
+        || (signedIn() && (resource == null || resource.data.reporterId == request.auth.uid));
       allow update: if isAdmin()
         && request.resource.data.postId == resource.data.postId
         && request.resource.data.reporterId == resource.data.reporterId
