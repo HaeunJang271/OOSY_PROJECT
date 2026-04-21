@@ -113,19 +113,25 @@ export async function fetchNicknamesByUids(
   // 공개 조회는 nicknames(닉네임 -> uid 매핑)에서 역조회한다.
   for (let i = 0; i < uniq.length; i += 10) {
     const chunk = uniq.slice(i, i + 10);
-    const q = query(
-      collection(db, "nicknames"),
-      where("uid", "in", chunk),
-    );
-    const snap = await getDocs(q);
-    snap.forEach((d) => {
-      const data = d.data() as { uid?: unknown };
-      const uid = typeof data.uid === "string" ? data.uid.trim() : "";
-      const nickname = d.id.trim();
-      if (uid && nickname && !result[uid]) {
-        result[uid] = nickname;
-      }
-    });
+    try {
+      const q = query(
+        collection(db, "nicknames"),
+        where("uid", "in", chunk),
+      );
+      const snap = await getDocs(q);
+      snap.forEach((d) => {
+        const data = d.data() as { uid?: unknown };
+        const uid = typeof data.uid === "string" ? data.uid.trim() : "";
+        const nickname = d.id.trim();
+        if (uid && nickname && !result[uid]) {
+          result[uid] = nickname;
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      // 공개 화면(비로그인 포함)에서 권한/쿼리 실패가 나도 본문 표시를 막지 않음
+      continue;
+    }
   }
 
   return result;

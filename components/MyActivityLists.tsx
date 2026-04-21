@@ -16,6 +16,10 @@ function isIndexBuildingError(e: unknown): boolean {
   return msg.includes("currently building") || msg.includes("building and cannot be used");
 }
 
+function isPermissionDeniedError(e: unknown): boolean {
+  return !!e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "permission-denied";
+}
+
 const cardShadow = { boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" };
 
 function PostList({ list, emptyText }: { list: Post[]; emptyText: string }) {
@@ -109,11 +113,11 @@ export function MyActivityLists({ userId }: Props) {
       if (failures.length > 0) {
         failures.forEach((f) => console.error(f));
         const hasIndexError = failures.some((f) => isIndexBuildingError(f));
-        setError(
-          hasIndexError
-            ? "일부 활동은 인덱스 생성 중이라 불러오지 못했습니다. 잠시 후 새로고침해 주세요."
-            : "일부 활동을 불러오지 못했습니다.",
-        );
+        if (hasIndexError) {
+          setError("일부 활동은 인덱스 생성 중이라 불러오지 못했습니다. 잠시 후 새로고침해 주세요.");
+        } else if (failures.some((f) => !isPermissionDeniedError(f))) {
+          setError("일부 활동을 불러오지 못했습니다.");
+        }
       }
     } catch (e) {
       console.error(e);

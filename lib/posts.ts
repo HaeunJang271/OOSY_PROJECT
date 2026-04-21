@@ -167,13 +167,16 @@ export async function fetchPostsByIds(postIds: string[]): Promise<Post[]> {
   if (postIds.length === 0) return [];
   const db = getFirebaseDb();
   const uniq = [...new Set(postIds)];
-  const docs = await Promise.all(
+  const docs = await Promise.allSettled(
     uniq.map((id) => getDoc(doc(db, POSTS, id))),
   );
   const list: Post[] = [];
   for (const d of docs) {
-    if (d.exists()) {
-      list.push(mapPost(d.id, d.data() as Record<string, unknown>));
+    if (d.status !== "fulfilled") {
+      continue;
+    }
+    if (d.value.exists()) {
+      list.push(mapPost(d.value.id, d.value.data() as Record<string, unknown>));
     }
   }
   return list.sort((a, b) => timestampMs(b.createdAt) - timestampMs(a.createdAt));

@@ -59,8 +59,10 @@ export function PostDetail({ postId }: Props) {
     setAccessDenied(false);
     setNotFound(false);
     setLoadingPost(true);
+    let hasFetchedPost = false;
     try {
       const p = await fetchPostById(postId);
+      hasFetchedPost = true;
       setPost(p);
       if (!p) {
         setNotFound(true);
@@ -123,7 +125,7 @@ export function PostDetail({ postId }: Props) {
       }
     } catch (e) {
       console.error(e);
-      if (isPermissionDeniedError(e)) {
+      if (isPermissionDeniedError(e) && !hasFetchedPost) {
         setAccessDenied(true);
         setError(null);
       } else {
