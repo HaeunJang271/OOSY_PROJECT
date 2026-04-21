@@ -61,20 +61,67 @@ export function MyActivityLists({ userId }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const [posts, questions, bookmarkIds, likeIds] = await Promise.all([
+      const [postsRes, questionsRes, bookmarkIdsRes, likeIdsRes] = await Promise.allSettled([
         fetchMyPosts(userId),
         fetchMyRootQuestions(userId),
         fetchMyBookmarkedPostIds(userId),
         fetchMyLikedPostIds(userId),
       ]);
-      const [bookmarkPosts, likePosts] = await Promise.all([fetchPostsByIds(bookmarkIds), fetchPostsByIds(likeIds)]);
+
+      const failures: unknown[] = [];
+
+      const posts =
+        postsRes.status === "fulfilled"
+          ? postsRes.value
+          : (failures.push(postsRes.reason), []);
+      const questions =
+        questionsRes.status === "fulfilled"
+          ? questionsRes.value
+          : (failures.push(questionsRes.reason), []);
+      const bookmarkIds =
+        bookmarkIdsRes.status === "fulfilled"
+          ? bookmarkIdsRes.value
+          : (failures.push(bookmarkIdsRes.reason), []);
+      const likeIds =
+        likeIdsRes.status === "fulfilled"
+          ? likeIdsRes.value
+          : (failures.push(likeIdsRes.reason), []);
+
+      const [bookmarkPostsRes, likePostsRes] = await Promise.allSettled([
+        fetchPostsByIds(bookmarkIds),
+        fetchPostsByIds(likeIds),
+      ]);
+
+      const bookmarkPosts =
+        bookmarkPostsRes.status === "fulfilled"
+          ? bookmarkPostsRes.value
+          : (failures.push(bookmarkPostsRes.reason), []);
+      const likePosts =
+        likePostsRes.status === "fulfilled"
+          ? likePostsRes.value
+          : (failures.push(likePostsRes.reason), []);
+
       setMyPosts(posts);
       setMyQuestions(questions);
       setBookmarks(bookmarkPosts);
       setLikes(likePosts);
+
+      if (failures.length > 0) {
+        failures.forEach((f) => console.error(f));
+        const hasIndexError = failures.some((f) => isIndexBuildingError(f));
+        setError(
+          hasIndexError
+            ? "일부 활동은 인덱스 생성 중이라 불러오지 못했습니다. 잠시 후 새로고침해 주세요."
+            : "일부 활동을 불러오지 못했습니다.",
+        );
+      }
     } catch (e) {
       console.error(e);
-      setError(isIndexBuildingError(e) ? "인덱스 생성 중입니다. 잠시 후 새로고침해 주세요." : "내 활동 목록을 불러오지 못했습니다.");
+      setError(
+        isIndexBuildingError(e)
+          ? "인덱스 생성 중입니다. 잠시 후 새로고침해 주세요."
+          : "내 활동 목록을 불러오지 못했습니다.",
+      );
     } finally {
       setLoading(false);
     }
