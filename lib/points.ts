@@ -1,4 +1,10 @@
-import { doc, getDoc, onSnapshot, setDoc, type Unsubscribe } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  onSnapshot,
+  runTransaction,
+  type Unsubscribe,
+} from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
 
 const USERS = "users";
@@ -17,15 +23,17 @@ export async function fetchMyPoints(uid: string): Promise<number> {
 export async function ensureMyPoints(uid: string): Promise<boolean> {
   const db = getFirebaseDb();
   const ref = doc(db, USERS, uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, { points: DEFAULT_POINTS }, { merge: true });
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) {
+      tx.set(ref, { points: DEFAULT_POINTS }, { merge: true });
+      return true;
+    }
+    const data = snap.data() as { points?: unknown };
+    if (typeof data.points === "number") return false;
+    tx.set(ref, { points: DEFAULT_POINTS }, { merge: true });
     return true;
-  }
-  const data = snap.data() as { points?: unknown };
-  if (typeof data.points === "number") return false;
-  await setDoc(ref, { points: DEFAULT_POINTS }, { merge: true });
-  return true;
+  });
 }
 
 export function listenMyPoints(uid: string, onValue: (points: number) => void): Unsubscribe {

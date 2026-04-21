@@ -205,8 +205,8 @@ export async function setNickname(params: {
         nickname,
         points:
           userSnap.exists() && typeof (userSnap.data() as { points?: unknown }).points === "number"
-            ? ((userSnap.data() as { points?: number }).points ?? 10)
-            : 10,
+            ? ((userSnap.data() as { points?: number }).points ?? 5)
+            : 5,
         createdAt: userSnap.exists()
           ? (userSnap.data() as { createdAt?: unknown }).createdAt ?? serverTimestamp()
           : serverTimestamp(),

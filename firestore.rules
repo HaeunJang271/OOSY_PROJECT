@@ -210,7 +210,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasAny(['nickname', 'points'])
         && (!('points' in request.resource.data)
           || (request.resource.data.points is int
-            && request.resource.data.points == 10))
+            && request.resource.data.points == 5))
         && (!('nickname' in request.resource.data)
           || validNickname(request.resource.data.nickname));
       allow update: if (signedIn()
@@ -220,7 +220,7 @@ service cloud.firestore {
           || (
             !('points' in resource.data)
             && request.resource.data.points is int
-            && request.resource.data.points == 10
+            && request.resource.data.points == 5
           )
           || (
             ('points' in resource.data)
