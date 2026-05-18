@@ -104,46 +104,39 @@ export function SearchPageContent() {
     <div className="space-y-6">
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4"
+        className="surface-card-pad"
         role="search"
       >
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
             type="search"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="제목·본문에서 검색"
-            className="min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-950 shadow-sm outline-none placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
+            className="input-field-plain min-w-0 flex-1 text-sm"
             autoComplete="off"
           />
-          <button
-            type="submit"
-            className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2"
-          >
+          <button type="submit" className="btn-primary shrink-0 w-auto px-5 py-2.5 text-sm">
             검색
           </button>
         </div>
       </form>
 
-      {loading && <p className="text-sm text-neutral-700">검색 중…</p>}
+      {loading && <p className="text-sm text-muted">검색 중…</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {!loading && !error && q && posts.length === 0 && (
-        <p className="text-sm text-neutral-800">검색 결과가 없습니다.</p>
+        <p className="text-sm text-muted">검색 결과가 없습니다.</p>
       )}
 
       {!loading && !error && posts.length > 0 && (
-        <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
+        <ul className="list-panel divide-y divide-[color:var(--border-subtle)]">
           {posts.map((p) => (
-            <li key={p.id} className="px-3 py-4 first:rounded-t-lg last:rounded-b-lg sm:px-4">
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
-                    {p.category}
-                  </span>
-                  <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-950">
-                    {p.region}
-                  </span>
+            <li key={p.id} className="px-4 py-5 first:rounded-t-lg last:rounded-b-lg sm:px-5">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <span className="badge">{p.category}</span>
+                  <span className="badge badge-accent">{p.region}</span>
                 </div>
                 <PostActionsMenu
                   postId={p.id}
@@ -154,19 +147,16 @@ export function SearchPageContent() {
                   reporterId={user?.uid}
                   onDeleted={() => void load()}
                   onReported={() => void load()}
-                  triggerClassName="h-5 w-5 text-zinc-600 hover:bg-zinc-100"
+                  triggerClassName="h-5 w-5 text-[color:var(--text-tertiary)]"
                 />
               </div>
-              <Link
-                href={`/posts/${p.id}`}
-                className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
-              >
-                <h2 className="text-lg font-semibold leading-snug text-neutral-950">
+              <Link href={`/posts/${p.id}`} className="block focus-ring rounded-sm">
+                <h2 className="text-lg font-semibold leading-snug text-foreground">
                   {p.title}
                 </h2>
-                <div className="mt-2 flex items-baseline justify-between gap-2 text-xs font-medium text-neutral-600">
+                <div className="mt-2 flex items-baseline justify-between gap-2 text-meta font-medium">
                   <span className="min-w-0 shrink">{formatDate(p.createdAt)}</span>
-                  <span className="shrink-0 text-right text-neutral-700">
+                  <span className="shrink-0 text-right text-muted">
                     {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
                   </span>
                 </div>

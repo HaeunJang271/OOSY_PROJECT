@@ -26,23 +26,20 @@ export default function PointsPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
-        <p className="text-sm text-neutral-700">불러오는 중…</p>
+      <div className="page-shell">
+        <p className="text-sm text-muted">불러오는 중…</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
-        <h1 className="mb-2 text-xl font-semibold text-neutral-950">포인트</h1>
-        <p className="mb-6 text-sm text-neutral-800">
-          포인트를 확인하려면 로그인해 주세요.
-        </p>
-        <Link
-          href="/login"
-          className="inline-flex rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-[#ffffff]"
-        >
+      <div className="page-shell">
+        <div className="page-header">
+          <h1 className="page-title">포인트</h1>
+          <p className="page-lead">포인트를 확인하려면 로그인해 주세요.</p>
+        </div>
+        <Link href="/login" className="btn-primary inline-flex w-auto px-5">
           로그인
         </Link>
       </div>
@@ -92,20 +89,21 @@ export default function PointsPage() {
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
-      <h1 className="mb-2 text-xl font-semibold text-neutral-950">포인트</h1>
-      <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
-        <p className="text-xs font-medium text-neutral-500">현재 포인트</p>
-        <p className="mt-1 text-2xl font-bold text-neutral-950">
-          $ {pointsLoading ? "…" : `${points}P`}
-        </p>
+    <div className="page-shell">
+      <div className="page-header">
+        <h1 className="page-title">포인트</h1>
+        <p className="page-lead">활동으로 쌓은 포인트로 보상을 신청할 수 있습니다.</p>
+      </div>
+      <div className="surface-card-pad">
+        <p className="stat-label">현재 포인트</p>
+        <p className="stat-value">{pointsLoading ? "…" : `${points}P`}</p>
       </div>
 
-      <section className="mt-6">
-        <h2 className="mb-3 text-sm font-semibold text-neutral-950">보상</h2>
+      <section className="mt-8">
+        <h2 className="mb-4 text-sm font-semibold text-foreground">보상</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[
-{ rewardKey: "gift_1000" as const, title: "편의점 상품권 1000원", costPoints: 10, sub: "10P" },
+            { rewardKey: "gift_1000" as const, title: "편의점 상품권 1000원", costPoints: 10, sub: "10P" },
             { rewardKey: "gift_2000" as const, title: "편의점 상품권 2000원", costPoints: 20, sub: "20P" },
             { rewardKey: "gift_5000" as const, title: "편의점 상품권 5000원", costPoints: 50, sub: "50P" },
             { rewardKey: "gift_10000" as const, title: "편의점 상품권 10000원", costPoints: 100, sub: "100P" },
@@ -120,26 +118,19 @@ export default function PointsPage() {
                   costPoints: r.costPoints,
                 })
               }
-              className="aspect-square w-full rounded-xl border border-zinc-200 bg-white p-3 text-left shadow-sm transition-colors hover:bg-zinc-50"
+              className="surface-card aspect-square w-full p-4 text-left transition-colors duration-150 hover:bg-[color:var(--surface-muted)]"
             >
-              <p className="text-sm font-semibold text-neutral-950">{r.title}</p>
-              {r.sub ? (
-                <p className="mt-1 text-xs font-medium text-neutral-600">
-                  {r.sub}
-                </p>
-              ) : null}
+              <p className="text-sm font-semibold text-foreground">{r.title}</p>
+              {r.sub ? <p className="mt-1 text-meta">{r.sub}</p> : null}
             </button>
           ))}
         </div>
       </section>
       {toast && (
-        <div className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-50 mx-auto w-full max-w-2xl px-4">
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 shadow-sm">
-            {toast}
-          </div>
+        <div className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-50 mx-auto w-full max-w-2xl px-5">
+          <div className="surface-card px-4 py-3 text-sm text-foreground">{toast}</div>
         </div>
       )}
     </div>
   );
 }
-

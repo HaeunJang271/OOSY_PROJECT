@@ -138,12 +138,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
       {loginRewardOpen && (
         <div className="fixed inset-x-0 top-14 z-50 mx-auto w-full max-w-2xl px-4">
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 shadow-sm">
+          <div className="surface-card flex items-center justify-between gap-3 px-4 py-3 text-sm text-foreground">
             <p className="font-semibold">로그인 보상 5P</p>
             <button
               type="button"
               onClick={() => setLoginRewardOpen(false)}
-              className="rounded-md border border-emerald-200 bg-white px-2 py-1 text-xs font-medium text-emerald-900 hover:bg-emerald-50"
+              className="btn-secondary px-2 py-1 text-xs"
             >
               닫기
             </button>

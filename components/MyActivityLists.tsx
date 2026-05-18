@@ -20,7 +20,6 @@ function isPermissionDeniedError(e: unknown): boolean {
   return !!e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "permission-denied";
 }
 
-const cardShadow = { boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" };
 
 function PostList({ list, emptyText }: { list: Post[]; emptyText: string }) {
   return list.length === 0 ? (
@@ -28,10 +27,10 @@ function PostList({ list, emptyText }: { list: Post[]; emptyText: string }) {
   ) : (
     <ul className="space-y-2">
       {list.map((p) => (
-        <li key={p.id} className="rounded-xl bg-white px-4 py-3.5" style={cardShadow}>
+        <li key={p.id} className="surface-card px-5 py-4">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             {p.status === "pending" && (
-              <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.008em] text-amber-700">
+              <span className="badge-status">
                 승인 대기
               </span>
             )}
@@ -172,7 +171,7 @@ export function MyActivityLists({ userId }: Props) {
         ) : (
           <ul className="space-y-2">
             {myQuestions.map((q) => (
-              <li key={q.id} className="rounded-xl bg-white px-4 py-3.5" style={cardShadow}>
+              <li key={q.id} className="surface-card px-5 py-4">
                 <p className="text-[15px] tracking-[-0.016em] text-[#1d1d1f]">{q.content}</p>
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <p className="text-[12px] tracking-[-0.008em] text-[#1d1d1f]/40">{formatDate(q.createdAt)}</p>

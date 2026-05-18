@@ -48,12 +48,13 @@ export function HeaderSearchPanel({ open, onClose }: Props) {
   return (
     <div
       id="header-search-panel"
-      className="absolute left-0 right-0 top-full z-20 border-b border-zinc-200 bg-white shadow-lg"
+      className="absolute left-0 right-0 top-full z-20 border-b border-[color:var(--border-subtle)] bg-[color:var(--surface)]"
+      style={{ boxShadow: "var(--shadow-card)" }}
       role="search"
     >
       <form
         onSubmit={handleSubmit}
-        className="mx-auto max-w-2xl px-4 pb-4 pt-3"
+        className="mx-auto max-w-2xl px-5 pb-5 pt-4"
       >
 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
@@ -62,12 +63,12 @@ export function HeaderSearchPanel({ open, onClose }: Props) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="제목·본문에서 검색"
-            className="min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-950 shadow-sm outline-none placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-400/30"
+            className="input-field-plain min-w-0 flex-1 text-sm"
             autoComplete="off"
           />
           <button
             type="submit"
-            className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2"
+            className="btn-primary shrink-0 w-auto px-5 py-2.5 text-sm"
           >
             검색
           </button>

@@ -67,8 +67,8 @@ export default function EditPostPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
-        <p className="text-sm text-zinc-700">불러오는 중…</p>
+      <div className="page-shell">
+        <p className="text-sm text-muted">불러오는 중…</p>
       </div>
     );
   }
@@ -77,11 +77,11 @@ export default function EditPostPage() {
   }
   if (error || !post) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
+      <div className="page-shell">
         <p className="text-sm text-red-600">{error ?? "글을 불러올 수 없습니다."}</p>
         <Link
           href={id ? `/posts/${id}` : "/"}
-          className="mt-4 inline-block text-sm font-medium text-zinc-950 underline"
+          className="link-inline mt-4 inline-block text-sm"
         >
           {id ? "글 보기" : "홈으로"}
         </Link>
@@ -90,14 +90,17 @@ export default function EditPostPage() {
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 px-4 py-8">
+    <div className="page-shell pb-16">
       <Link
         href={`/posts/${id}`}
-        className="mb-6 inline-block text-sm font-semibold text-neutral-800 hover:text-neutral-950"
+        className="mb-8 inline-block text-sm font-medium text-muted hover:text-foreground"
       >
         ← 글 보기
       </Link>
-      <h1 className="mb-6 text-xl font-semibold text-zinc-950">글 수정</h1>
+      <div className="page-header">
+        <h1 className="page-title">글 수정</h1>
+        <p className="page-lead">승인 대기 중인 글만 수정할 수 있습니다.</p>
+      </div>
       <WritePostForm mode="edit" initialPost={post} />
     </div>
   );

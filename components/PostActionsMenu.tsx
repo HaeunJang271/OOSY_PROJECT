@@ -136,10 +136,9 @@ export function PostActionsMenu({
       {open && (
         <div
           role="menu"
-          className={`absolute top-full z-20 mt-1 min-w-32 overflow-hidden rounded-xl py-1 ${
+          className={`menu-popover absolute top-full z-20 mt-1 min-w-32 overflow-hidden rounded-xl py-1 ${
             align === "right" ? "right-0" : "left-0"
           }`}
-          style={{ background: "rgba(255,255,255,0.78)", backdropFilter: "saturate(180%) blur(20px)", WebkitBackdropFilter: "saturate(180%) blur(20px)", border: "1px solid rgba(255,255,255,0.9)", boxShadow: "0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.95)" }}
         >
           {showEdit && (
             <Link

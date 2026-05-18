@@ -46,7 +46,7 @@ export function CommentActionsMenu({
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={deleting}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-600 hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-1 disabled:opacity-50"
+        className="btn-secondary flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-0 focus-ring disabled:opacity-50"
         aria-label="댓글 메뉴"
         aria-expanded={open}
         aria-haspopup="true"
@@ -66,7 +66,7 @@ export function CommentActionsMenu({
       {open && (
         <div
           role="menu"
-          className={`absolute top-full z-20 mt-1 min-w-30 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg ${
+          className={`menu-popover absolute top-full z-20 mt-1 min-w-30 overflow-hidden rounded-xl py-1 ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >
@@ -74,7 +74,7 @@ export function CommentActionsMenu({
             <button
               type="button"
               role="menuitem"
-              className="w-full px-3 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100"
+              className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-black/[0.04]"
               onClick={() => {
                 setOpen(false);
                 onEdit();

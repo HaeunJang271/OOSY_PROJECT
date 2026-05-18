@@ -194,12 +194,12 @@ export function AdminDashboard() {
   }
 
   if (loading) {
-    return <p className="text-sm text-zinc-700">확인 중…</p>;
+    return <p className="text-sm text-muted">확인 중…</p>;
   }
   if (!user) {
     return (
-      <p className="text-sm text-zinc-800">
-        <Link href="/login" className="font-medium text-zinc-950 underline">
+      <p className="text-sm text-muted">
+        <Link href="/login" className="link-inline">
           로그인
         </Link>
         이 필요합니다.
@@ -208,59 +208,43 @@ export function AdminDashboard() {
   }
   if (!isAdmin) {
     return (
-      <p className="text-sm text-zinc-800">
+      <p className="text-sm text-muted">
         관리자만 접근할 수 있습니다. Firestore{" "}
-        <code className="rounded bg-zinc-200 px-1.5 py-0.5 text-zinc-900">admins</code> 컬렉션에 문서 ID를 본인
+        <code className="rounded bg-[color:var(--surface-muted)] px-1.5 py-0.5 text-foreground">admins</code> 컬렉션에 문서 ID를 본인
         계정 UID(
-        <span className="break-all font-mono text-sm text-zinc-950">{user.uid}</span>)로 추가했는지 확인해 주세요.
+        <span className="break-all font-mono text-sm text-foreground">{user.uid}</span>)로 추가했는지 확인해 주세요.
       </p>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2 rounded-xl border border-zinc-300 bg-zinc-100/80 p-1">
+      <div className="admin-tab-track">
         <button
           type="button"
           onClick={() => setTab("pending")}
-          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
-            tab === "pending"
-              ? "bg-white text-zinc-950 shadow-sm"
-              : "text-zinc-800"
-          }`}
+          className={`admin-tab ${tab === "pending" ? "admin-tab-active" : "admin-tab-idle"}`}
         >
           글 승인 대기 ({pending.length})
         </button>
         <button
           type="button"
           onClick={() => setTab("approved")}
-          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
-            tab === "approved"
-              ? "bg-white text-zinc-950 shadow-sm"
-              : "text-zinc-800"
-          }`}
+          className={`admin-tab ${tab === "approved" ? "admin-tab-active" : "admin-tab-idle"}`}
         >
           공개 글 관리
         </button>
         <button
           type="button"
           onClick={() => setTab("reports")}
-          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
-            tab === "reports"
-              ? "bg-white text-zinc-950 shadow-sm"
-              : "text-zinc-800"
-          }`}
+          className={`admin-tab ${tab === "reports" ? "admin-tab-active" : "admin-tab-idle"}`}
         >
           신고 관리 ({reports.length})
         </button>
         <button
           type="button"
           onClick={() => setTab("rewards")}
-          className={`min-w-28 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
-            tab === "rewards"
-              ? "bg-white text-zinc-950 shadow-sm"
-              : "text-zinc-800"
-          }`}
+          className={`admin-tab ${tab === "rewards" ? "admin-tab-active" : "admin-tab-idle"}`}
         >
           보상 신청 ({rewardRequests.length})
         </button>
@@ -270,14 +254,14 @@ export function AdminDashboard() {
 
       {tab === "pending" && (
         <section className="space-y-3">
-          <p className="text-sm text-zinc-800">
+          <p className="text-sm text-muted">
             승인하면 홈에 노출됩니다. 거부는 글 삭제로 처리합니다.
           </p>
           {pending.length === 0 && !error && (
-            <p className="text-sm text-zinc-700">대기 중인 글이 없습니다.</p>
+            <p className="text-sm text-muted">대기 중인 글이 없습니다.</p>
           )}
           {pending.length > 0 && (
-            <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm">
+            <ul className="list-panel divide-y divide-[color:var(--border-subtle)]">
               {pending.map((p) => (
                 <li
                   key={p.id}
@@ -286,29 +270,23 @@ export function AdminDashboard() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="mb-1.5 flex flex-wrap gap-1.5">
-                        <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
-                          승인 대기
-                        </span>
-                        <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-neutral-900">
-                          {p.category}
-                        </span>
-                        <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-950">
-                          {p.region}
-                        </span>
+                        <span className="badge-status">승인 대기</span>
+                        <span className="badge">{p.category}</span>
+                        <span className="badge badge-accent">{p.region}</span>
                       </div>
                       <Link
                         href={`/posts/${p.id}`}
-                        className="block outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-zinc-400"
+                        className="block focus-ring rounded-sm"
                       >
-                        <h2 className="text-lg font-semibold leading-snug text-neutral-950 hover:underline">
+                        <h2 className="text-lg font-semibold leading-snug text-foreground hover:underline">
                           {p.title}
                         </h2>
                       </Link>
-                      <div className="mt-2 flex items-baseline justify-between gap-2 text-xs font-medium text-neutral-600">
+                      <div className="mt-2 flex items-baseline justify-between gap-2 text-meta font-medium">
                         <span className="min-w-0 shrink">
                           {formatDate(p.createdAt)}
                         </span>
-                        <span className="shrink-0 text-right text-neutral-700">
+                        <span className="shrink-0 text-right text-muted">
                           {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
                         </span>
                       </div>
@@ -318,7 +296,7 @@ export function AdminDashboard() {
                         type="button"
                         disabled={busy}
                         onClick={() => approve(p.id)}
-                        className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-[#ffffff] disabled:opacity-50"
+                        className="btn-approve"
                       >
                         승인
                       </button>
@@ -326,7 +304,7 @@ export function AdminDashboard() {
                         type="button"
                         disabled={busy}
                         onClick={() => removePost(p.id)}
-                        className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
+                        className="btn-danger"
                       >
                         거부
                       </button>
@@ -341,35 +319,33 @@ export function AdminDashboard() {
 
       {tab === "approved" && (
         <section className="space-y-3">
-          <p className="text-sm text-zinc-800">
+          <p className="text-sm text-muted">
             최근 공개 글 50개입니다. 삭제 시 댓글도 함께 지워집니다.
           </p>
           {approved.length === 0 && !error && (
-            <p className="text-sm text-zinc-700">공개된 글이 없습니다.</p>
+            <p className="text-sm text-muted">공개된 글이 없습니다.</p>
           )}
           <ul className="space-y-3">
             {approved.map((p) => (
               <li
                 key={p.id}
-                className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+                className="surface-card-pad"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                      <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900">
-                        공개
-                      </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="badge badge-accent">공개</span>
+                      <span className="text-meta">
                         {p.category} · {p.region}
                       </span>
                     </div>
                     <Link
                       href={`/posts/${p.id}`}
-                      className="font-medium text-zinc-950 hover:underline"
+                      className="font-medium text-foreground hover:underline"
                     >
                       {p.title}
                     </Link>
-                    <p className="mt-1 text-xs text-zinc-600">
+                    <p className="mt-1 text-meta">
                       {formatDate(p.createdAt)} · 작성자{" "}
                       {nicknameByUid[p.authorId] ?? shortUid(p.authorId)}
                     </p>
@@ -379,7 +355,7 @@ export function AdminDashboard() {
                       type="button"
                       disabled={busy}
                       onClick={() => removePost(p.id)}
-                      className="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50 sm:w-auto"
+                      className="btn-danger w-full sm:w-auto"
                     >
                       삭제
                     </button>
@@ -393,17 +369,17 @@ export function AdminDashboard() {
 
       {tab === "reports" && (
         <section className="space-y-3">
-          <p className="text-sm text-zinc-800">
+          <p className="text-sm text-muted">
             사용자 신고 내역입니다. 확인 후 처리 완료를 누르거나, 필요 시 글을 삭제하세요.
           </p>
           {reports.length === 0 && !error && (
-            <p className="text-sm text-zinc-700">처리할 신고가 없습니다.</p>
+            <p className="text-sm text-muted">처리할 신고가 없습니다.</p>
           )}
           <ul className="space-y-3">
             {reports.map((r) => (
               <li
                 key={r.id}
-                className="cursor-pointer rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
+                className="surface-card-pad cursor-pointer transition-colors duration-150 hover:bg-[color:var(--surface-muted)]"
                 onClick={() => {
                   window.location.href = `/posts/${r.postId}?fromReport=1`;
                 }}
@@ -411,17 +387,15 @@ export function AdminDashboard() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                      <span className="rounded-md bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-900">
-                        신고 접수
-                      </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="badge-status">신고 접수</span>
+                      <span className="text-meta">
                         postId: {r.postId}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-600">
+                    <p className="text-meta">
                       신고자: {nicknameByUid[r.reporterId] ?? shortUid(r.reporterId)}
                     </p>
-                    <p className="mt-1 text-xs text-zinc-600">
+                    <p className="mt-1 text-meta">
                       신고 유형: {r.reportType}
                     </p>
                   </div>
@@ -433,7 +407,7 @@ export function AdminDashboard() {
                         e.stopPropagation();
                         void resolveReport(r.id);
                       }}
-                      className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 disabled:opacity-50"
+                      className="btn-secondary text-sm disabled:opacity-50"
                     >
                       처리 완료
                     </button>
@@ -444,7 +418,7 @@ export function AdminDashboard() {
                         e.stopPropagation();
                         void removePost(r.postId);
                       }}
-                      className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700 disabled:opacity-50"
+                      className="btn-danger disabled:opacity-50"
                     >
                       글 삭제
                     </button>
@@ -458,35 +432,33 @@ export function AdminDashboard() {
 
       {tab === "rewards" && (
         <section className="space-y-3">
-          <p className="text-sm text-zinc-800">
+          <p className="text-sm text-muted">
             포인트 보상 신청 내역입니다. 확인 후 처리 완료를 눌러 주세요.
           </p>
           {rewardRequests.length === 0 && !error && (
-            <p className="text-sm text-zinc-700">처리할 신청이 없습니다.</p>
+            <p className="text-sm text-muted">처리할 신청이 없습니다.</p>
           )}
           <ul className="space-y-3">
             {rewardRequests.map((r) => (
               <li
                 key={r.id}
-                className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+                className="surface-card-pad"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                      <span className="rounded-md bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-900">
-                        보상 신청
-                      </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="badge badge-accent">보상 신청</span>
+                      <span className="text-meta">
                         {r.rewardName} · {r.costPoints}P
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-600">
+                    <p className="text-meta">
                       신청자: {nicknameByUid[r.userId] ?? shortUid(r.userId)}
                     </p>
-                    <p className="mt-1 text-xs text-zinc-600">
+                    <p className="mt-1 text-meta">
                       전화번호: {r.phone}
                     </p>
-                    <p className="mt-1 text-xs text-zinc-600">
+                    <p className="mt-1 text-meta">
                       신청일: {formatDate(r.createdAt)}
                     </p>
                   </div>
@@ -495,7 +467,7 @@ export function AdminDashboard() {
                       type="button"
                       disabled={busy}
                       onClick={() => void fulfillReward(r.id)}
-                      className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 disabled:opacity-50"
+                      className="btn-secondary text-sm disabled:opacity-50"
                     >
                       처리 완료
                     </button>
@@ -507,53 +479,53 @@ export function AdminDashboard() {
         </section>
       )}
 
-      <section className="mt-10 border-t border-zinc-200 pt-6">
+      <section className="mt-10 border-t border-[color:var(--border-subtle)] pt-6">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-base font-semibold text-neutral-950">통계</h2>
+          <h2 className="text-base font-semibold text-foreground">통계</h2>
           <button
             type="button"
             disabled={busy}
             onClick={() => void loadStats()}
-            className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50"
+            className="btn-secondary px-2.5 py-1 text-xs disabled:opacity-50"
           >
             새로고침
           </button>
         </div>
         {!stats ? (
-          <p className="text-sm text-zinc-700">통계를 불러오지 못했습니다.</p>
+          <p className="text-sm text-muted">통계를 불러오지 못했습니다.</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-neutral-500">가입자 수</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.userCount}</p>
+            <div className="surface-card-pad">
+              <p className="stat-label">가입자 수</p>
+              <p className="stat-value">{stats.userCount}</p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-neutral-500">게시글 수</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.postCount}</p>
+            <div className="surface-card-pad">
+              <p className="stat-label">게시글 수</p>
+              <p className="stat-value">{stats.postCount}</p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-neutral-500">질문 수</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.questionCount}</p>
+            <div className="surface-card-pad">
+              <p className="stat-label">질문 수</p>
+              <p className="stat-value">{stats.questionCount}</p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-neutral-500">오늘 방문(사용) 수</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.todayVisits}</p>
+            <div className="surface-card-pad">
+              <p className="stat-label">오늘 방문(사용) 수</p>
+              <p className="stat-value">{stats.todayVisits}</p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-neutral-500">일일 평균 방문(최근 30일)</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.avgDailyVisits30d}</p>
+            <div className="surface-card-pad">
+              <p className="stat-label">일일 평균 방문(최근 30일)</p>
+              <p className="stat-value">{stats.avgDailyVisits30d}</p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-neutral-500">총 방문(누적)</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-950">{stats.totalVisits}</p>
+            <div className="surface-card-pad">
+              <p className="stat-label">총 방문(누적)</p>
+              <p className="stat-value">{stats.totalVisits}</p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:col-span-2">
-              <p className="text-xs font-medium text-neutral-500">카테고리별 게시글 수</p>
+            <div className="surface-card-pad sm:col-span-2">
+              <p className="stat-label">카테고리별 게시글 수</p>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 {Object.entries(stats.categoryCounts).map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-                    <span className="text-sm font-medium text-zinc-900">{k}</span>
-                    <span className="text-sm font-semibold text-zinc-900">{v}</span>
+                  <div key={k} className="surface-inset flex items-center justify-between px-3 py-2">
+                    <span className="text-sm font-medium text-foreground">{k}</span>
+                    <span className="text-sm font-semibold text-foreground">{v}</span>
                   </div>
                 ))}
               </div>

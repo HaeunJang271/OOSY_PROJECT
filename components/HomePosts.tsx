@@ -116,18 +116,15 @@ export function HomePosts() {
     load();
   }, [load]);
 
-  const selectClass = "w-full appearance-none rounded-[11px] border-[3px] border-black/[0.04] bg-[#fafafc] px-3 py-2 pr-8 text-[15px] text-[#1d1d1f] tracking-[-0.016em] outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/30";
+  const selectClass = "input-field appearance-none pr-8";
 
   return (
-    <div className="space-y-5">
-      {/* 필터 */}
-      <section className="rounded-xl bg-white px-4 py-4" style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}>
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#1d1d1f]/40">
-          필터
-        </p>
-        <div className="grid gap-3 sm:grid-cols-2">
+    <div className="space-y-6">
+      <section className="surface-card-pad">
+        <p className="label-section">필터</p>
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="home-filter-category" className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]/70 tracking-[-0.012em]">
+            <label htmlFor="home-filter-category" className="label-field">
               주제
             </label>
             <div className="relative">
@@ -150,7 +147,7 @@ export function HomePosts() {
             </div>
           </div>
           <div>
-            <label htmlFor="home-filter-region" className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]/70 tracking-[-0.012em]">
+            <label htmlFor="home-filter-region" className="label-field">
               지역
             </label>
             <div className="relative">
@@ -191,21 +188,13 @@ export function HomePosts() {
       )}
 
       {posts.length > 0 && (
-        <ul className="space-y-2.5">
+        <ul className="space-y-3">
           {posts.map((p) => (
-            <li
-              key={p.id}
-              className="rounded-xl bg-white px-4 py-4"
-              style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}
-            >
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded-full bg-[#f5f5f7] px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.008em] text-[#1d1d1f]/70">
-                    {p.category}
-                  </span>
-                  <span className="rounded-full bg-[#0071e3]/10 px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.008em] text-[#0071e3]">
-                    {p.region}
-                  </span>
+            <li key={p.id} className="surface-card px-5 py-5">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <span className="badge">{p.category}</span>
+                  <span className="badge badge-accent">{p.region}</span>
                 </div>
                 <PostActionsMenu
                   postId={p.id}

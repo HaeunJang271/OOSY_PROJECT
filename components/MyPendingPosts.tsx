@@ -56,17 +56,14 @@ export function MyPendingPosts({ authorId }: Props) {
           {posts.map((p) => (
             <li
               key={p.id}
-              className="rounded-xl bg-white px-4 py-3.5"
-              style={{ boxShadow: "rgba(0,0,0,0.08) 0px 2px 12px 0px" }}
+              className="surface-card px-5 py-4"
             >
               <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[12px] tracking-[-0.008em] text-[#1d1d1f]/40">
                   {p.category} · {p.region}
                 </span>
                 <span className="inline-flex shrink-0 items-center gap-1">
-                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.008em] text-amber-700">
-                    승인 대기
-                  </span>
+                  <span className="badge-status">승인 대기</span>
                   <PostActionsMenu postId={p.id} authorId={authorId} onDeleted={() => void load()} />
                 </span>
               </div>

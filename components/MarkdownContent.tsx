@@ -29,7 +29,7 @@ export function MarkdownContent({ markdown, className }: Props) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-zinc-800 underline decoration-zinc-400 underline-offset-2 hover:text-zinc-950"
+              className="font-medium text-accent underline decoration-[color:var(--accent-muted)] underline-offset-2 hover:text-[color:var(--accent-hover)]"
               {...rest}
             >
               {children}

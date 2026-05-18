@@ -23,16 +23,13 @@ export function Header() {
 
   return (
     <div className="sticky top-0 z-30">
-      <header
-        className="relative z-10 border-b border-white/10"
-        style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "saturate(180%) blur(20px)" }}
-      >
-        <div className="mx-auto grid w-full min-w-0 max-w-2xl grid-cols-3 items-center px-4 h-12">
+      <header className="relative z-10 nav-glass-dark">
+        <div className="mx-auto grid h-12 w-full min-w-0 max-w-2xl grid-cols-3 items-center px-5">
           <div className="flex justify-start">
             <button
               type="button"
               onClick={() => setSearchOpen((v) => !v)}
-              className="btn-glass-dark inline-flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+              className="btn-icon-dark h-8 w-8 focus-ring"
               aria-expanded={searchOpen}
               aria-controls="header-search-panel"
               aria-label={searchOpen ? "검색 닫기" : "검색 열기"}
@@ -60,7 +57,7 @@ export function Header() {
             {user && (
               <Link
                 href="/points"
-                className="btn-glass-dark inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+                className="btn-pill-dark focus-ring"
                 aria-label="포인트 페이지로 이동"
               >
                 {loading ? "…" : `${points}P`}
@@ -69,7 +66,7 @@ export function Header() {
             {!user && !loading && (
               <Link
                 href="/login"
-                className="btn-glass-blue inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+                className="btn-accent focus-ring"
               >
                 로그인
               </Link>

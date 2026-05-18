@@ -104,29 +104,17 @@ function ThreadNode({
   return (
     <div
       className={
-        depth > 0
-          ? "mt-3 border-l-2 border-emerald-200/90 pl-3 sm:pl-4"
-          : "mt-4 first:mt-0"
+        depth > 0 ? "thread-indent" : "mt-4 first:mt-0"
       }
     >
-      <div className="rounded-xl border border-zinc-200 bg-linear-to-b from-white to-zinc-50/80 px-3 py-3 shadow-sm sm:px-4">
+      <div className="qna-card">
         <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
-              isRoot
-                ? "bg-sky-100 text-sky-900"
-                : "bg-emerald-100 text-emerald-900"
-            }`}
-          >
+          <span className={`badge ${isRoot ? "badge-accent" : "badge-muted"}`}>
             {isRoot ? "질문" : "답변"}
           </span>
-          {isAuthor && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-950">
-              글 작성자
-            </span>
-          )}
+          {isAuthor && <span className="badge-status">글 작성자</span>}
         </div>
-        <div className="mt-2 text-sm text-neutral-950">
+        <div className="mt-2 text-sm text-foreground">
           {editing ? (
             <form onSubmit={handleSaveEdit} className="space-y-2">
               <label className="sr-only" htmlFor={`edit-${comment.id}`}>
@@ -138,13 +126,13 @@ function ThreadNode({
                 onChange={(e) => setEditText(e.target.value)}
                 rows={4}
                 disabled={busyId === comment.id}
-                className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-500 disabled:opacity-50"
+                className="input-field-plain resize-y text-sm disabled:opacity-50"
               />
               <div className="flex flex-wrap gap-2">
                 <button
                   type="submit"
                   disabled={busyId === comment.id || !editText.trim()}
-                  className="rounded-lg bg-emerald-800 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                  className="btn-sm-primary disabled:opacity-50"
                 >
                   {busyId === comment.id ? "저장 중…" : "저장"}
                 </button>
@@ -155,7 +143,7 @@ function ThreadNode({
                     setEditText(comment.content);
                     setEditing(false);
                   }}
-                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
+                  className="btn-sm-secondary disabled:opacity-50"
                 >
                   취소
                 </button>
@@ -168,12 +156,12 @@ function ThreadNode({
             />
           )}
         </div>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-2">
-          <p className="text-xs font-medium text-neutral-600">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[color:var(--border-subtle)] pt-3">
+          <p className="text-meta font-medium">
             {nicknameByUid[comment.authorId] ?? shortUid(comment.authorId)} ·{" "}
             {formatDate(comment.createdAt)}
             {comment.updatedAt ? (
-              <span className="text-neutral-400"> · 수정됨</span>
+              <span className="text-[color:var(--text-tertiary)]"> · 수정됨</span>
             ) : null}
           </p>
           {!editing && (
@@ -184,7 +172,7 @@ function ThreadNode({
                   onClick={() =>
                     setReplyingToId(replyingToId === comment.id ? null : comment.id)
                   }
-                  className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
+                  className="btn-sm-secondary px-2 py-1 text-xs"
                 >
                   {replyingToId === comment.id ? "답글 취소" : "답글"}
                 </button>
@@ -273,7 +261,7 @@ function ReplyBox({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-3 rounded-lg border border-dashed border-zinc-300 bg-white p-3"
+      className="reply-form-box"
     >
       <label className="sr-only" htmlFor={`reply-${parentId ?? "root"}`}>
         답글 작성
@@ -283,13 +271,13 @@ function ReplyBox({
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={3}
-        className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-500"
+        className="input-field-plain resize-y text-sm"
       />
       <div className="mt-2 flex flex-wrap gap-2">
         <button
           type="submit"
           disabled={sending || !text.trim()}
-          className="rounded-lg bg-emerald-800 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+          className="btn-sm-primary disabled:opacity-50"
         >
           {sending ? "등록 중…" : submitLabel}
         </button>
@@ -297,7 +285,7 @@ function ReplyBox({
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50"
+            className="btn-sm-secondary"
           >
             취소
           </button>
@@ -414,14 +402,14 @@ export function QnaSection({
   );
 
   return (
-    <section className="border-t border-zinc-200 pt-6">
-      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+    <section className="border-t border-[color:var(--border-subtle)] pt-8">
+      <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-base font-semibold text-neutral-950">
+          <h2 className="text-base font-semibold text-foreground">
             Q&A 스레드
           </h2>
         </div>
-        <p className="text-xs font-medium text-neutral-500">
+        <p className="text-meta font-medium">
           댓글 {comments.length}
         </p>
       </div>
@@ -454,7 +442,7 @@ export function QnaSection({
       </ul>
 
       {post.status !== "approved" && (
-        <p className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+        <p className="notice-box-muted mt-6">
           승인 대기 중인 글에는 댓글을 달 수 없습니다. 공개 승인 후 Q&A를 이용할 수 있어요.
         </p>
       )}
@@ -462,8 +450,8 @@ export function QnaSection({
       {post.status === "approved" &&
         post.commentsEnabled !== false &&
         (user ? (
-          <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-            <h3 className="mb-2 text-sm font-semibold text-neutral-950">
+          <div className="surface-card-pad mt-6">
+            <h3 className="mb-3 text-sm font-semibold text-foreground">
               새 질문 올리기
             </h3>
             <ReplyBox
@@ -477,9 +465,9 @@ export function QnaSection({
             />
           </div>
         ) : (
-          <p className="mt-6 text-sm text-zinc-800">
+          <p className="mt-6 text-sm text-muted">
             질문을 남기려면{" "}
-            <Link href="/login" className="font-medium text-zinc-950 underline">
+            <Link href="/login" className="link-inline">
               로그인
             </Link>
             해 주세요.
@@ -487,7 +475,7 @@ export function QnaSection({
         ))}
 
       {post.status === "approved" && post.commentsEnabled === false && (
-        <p className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-neutral-800">
+        <p className="notice-box-muted mt-6">
           작성자가 Q&A를 꺼두었습니다.
         </p>
       )}
